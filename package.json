@@ -1,0 +1,14 @@
+{
+ "name": "nav2d",
+ "version": "1.0.0",
+ "description": "2d navigation meshes with pathfinding and funneling",
+ "main": "index.js",
+ "scripts": {
+  "test": "ava"
+ },
+ "devDependencies": {
+  "ava": "^1.0.0"
+ },
+ "author": "Francesco Pasa",
+ "license": "MIT"
+}
