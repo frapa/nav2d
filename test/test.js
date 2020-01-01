@@ -20,6 +20,7 @@ function polygon() {
 
 test('isclose', t => {
     t.true(isclose(5.456, 5.45600000001));
+    t.true(isclose(-0, 0));
     t.false(isclose(5.456, 5.4561));
 });
 
@@ -72,6 +73,7 @@ test('edge_on_edge', t => {
     t.true(edge().on_edge([1.5, 2]));
     t.true(new Edge([0, 0], [0, 2]).on_edge([0.000000001, 1]));
     t.false(edge().on_edge([1, 2]));
+    t.false(edge().on_edge([6, 8]));
 });
 
 test('construct_polygon_from_array', t => {
@@ -118,6 +120,7 @@ test('polygon_centroid', t => {
 test('polygon_on_edge', t => {
     t.true(polygon().on_edge([6, 6]));
     t.false(polygon().on_edge([7, 7]));
+    t.false(polygon().on_edge([3, 3]));
 });
 
 test('polygon_contains', t => {
