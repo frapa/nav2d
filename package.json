@@ -1,14 +1,32 @@
 {
- "name": "nav2d",
- "version": "1.0.0",
- "description": "2d navigation meshes with pathfinding and funneling",
- "main": "index.js",
- "scripts": {
-  "test": "ava"
- },
- "devDependencies": {
-  "ava": "^1.0.0"
- },
- "author": "Francesco Pasa",
- "license": "MIT"
+  "name": "nav2d",
+  "version": "1.0.0",
+  "description": "2d navigation meshes with pathfinding and funneling",
+  "main": "dist/nav2d.bundle.js",
+  "unpkg": "dist/nav2d.bundle.js",
+  "module": "src",
+  "scripts": {
+    "build": "webpack",
+    "prepublish": "npm run build",
+    "test": "nyc ava --verbose"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.7.7",
+    "ava": "^1.0.0",
+    "babel-loader": "^8.0.6",
+    "esm": "^3.2.25",
+    "nyc": "^15.0.0",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  },
+  "author": "Francesco Pasa",
+  "license": "MIT",
+  "dependencies": {
+    "point-in-polygon": "^1.0.1"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  }
 }
