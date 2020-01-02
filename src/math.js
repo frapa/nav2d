@@ -2,7 +2,7 @@ export const EPS = 1e-8;
 
 export class Vector {
     constructor(x, y) {
-        if (typeof (x) !== "number" || typeof (y) !== "number") {
+        if (typeof x !== "number" || typeof y !== "number") {
             throw new Error("Vector components must be numbers.");
         }
 
@@ -11,7 +11,7 @@ export class Vector {
     }
 
     _normOther(other) {
-        if (typeof (other) == "number") {
+        if (typeof other == "number") {
             return new Vector(other, other);
         }
         return other;
@@ -51,5 +51,5 @@ export function cross(a, b) {
 }
 
 export function isclose(a, b, eps = EPS) {
-    return (a > b - eps) && (a < b + eps);
+    return a > b - eps && a < b + eps;
 }

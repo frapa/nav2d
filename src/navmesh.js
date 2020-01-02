@@ -1,5 +1,5 @@
-import inside from 'point-in-polygon';
-import { Vector, isclose, cross, dot } from './math';
+import inside from "point-in-polygon";
+import { Vector, isclose, cross, dot } from "./math";
 
 function _normalizePoint(point) {
     if (point instanceof Array) {
@@ -25,11 +25,14 @@ export class Edge {
         point = _normalizePoint(point);
         const direction = this.p1.subtract(this.p2);
         const point_vec = this.p1.subtract(point);
-        const component = dot(direction, point_vec) / (direction.length() * direction.length());
+        const component =
+            dot(direction, point_vec) /
+            (direction.length() * direction.length());
         return (
-            isclose(cross(direction, point_vec), 0)
+            isclose(cross(direction, point_vec), 0) &&
             // test that it's not only collinear, but falls between p1 and p2
-            && component >= 0 && component <= 1
+            component >= 0 &&
+            component <= 1
         );
     }
 }
@@ -45,24 +48,29 @@ export class Polygon {
 
     edges() {
         return this.points.map(
-            (point, i) => new Edge(
-                i == 0 ? this.points[this.points.length - 1] : this.points[i - 1],
-                point
-            )
-        )
+            (point, i) =>
+                new Edge(
+                    i == 0
+                        ? this.points[this.points.length - 1]
+                        : this.points[i - 1],
+                    point
+                )
+        );
     }
 
     centroid() {
-        return this.points.reduce(
-            (acc, point) => acc.add(point),
-            new Vector(0, 0),
-        ).divide(this.points.length);
+        return this.points
+            .reduce((acc, point) => acc.add(point), new Vector(0, 0))
+            .divide(this.points.length);
     }
 
     contains(point) {
         point = _normalizePoint(point);
         const poly_points = this.points.map(this._toPointArray);
-        return inside(this._toPointArray(point), poly_points) || this.on_edge(point);
+        return (
+            inside(this._toPointArray(point), poly_points) ||
+            this.on_edge(point)
+        );
     }
 
     on_edge(point) {
@@ -78,11 +86,11 @@ export class Polygon {
 export class NavMesh {
     constructor(polygons) {
         this.polygons = polygons.map(points => Polygon(points));
-        this._buildNeighbors()
+        this._buildNeighbors();
     }
 
     _buildNeighbors() {
-        this.polygons.forEach(polygon => polygon.neighbors = []);
+        this.polygons.forEach(polygon => (polygon.neighbors = []));
 
         for (const i in this.polygons) {
             const poly1 = this.polygons[i];
@@ -97,9 +105,16 @@ export class NavMesh {
     }
 
     _areNeighbors(poly1, poly2) {
+        for (const point in poly1.points) {
+            if (poly2.on_edge(point)) return true;
+        }
 
+        for (const point in poly2.points) {
+            if (poly1.on_edge(point)) return true;
+        }
+
+        return false;
     }
-
 
     findPath(from, to) {
         from = _normalizePoint(from);

@@ -28,5 +28,8 @@
     "require": [
       "esm"
     ]
+  },
+  "prettier": {
+    "tabWidth": 4
   }
 }
