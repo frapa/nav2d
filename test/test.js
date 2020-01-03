@@ -51,6 +51,23 @@ function navmesh() {
     ]);
 }
 
+function big_navmesh() {
+    const poly_points = [];
+
+    for (let x = 0; x < 30; x++) {
+        for (let y = 0; y < 30; y++) {
+            poly_points.push([
+                [x * 10, y * 10],
+                [x * 10, y * 10 + 10],
+                [x * 10 + 10, y * 10 + 10],
+                [x * 10 + 10, y * 10],
+            ]);
+        }
+    }
+
+    return new NavMesh(poly_points);
+}
+
 test("isclose", t => {
     t.true(isclose(5.456, 5.45600000001));
     t.true(isclose(-0, 0));
@@ -129,6 +146,21 @@ test("construct_polygon_from_object", t => {
 test("construct_polygon_from_vector", t => {
     new Polygon([new Vector(0, 0), new Vector(0, 12), new Vector(12, 0)]);
     t.pass();
+});
+
+test("polygon_bounds", t => {
+    t.deepEqual(polygon().bounds, [0, 0, 12, 12]);
+});
+
+test("polygon_bounds_size", t => {
+    t.deepEqual(
+        new Polygon([
+            [10, 10],
+            [10, 20],
+            [15, 10],
+        ]).boundsSize(),
+        { x: 10, y: 10, w: 5, h: 10 }
+    );
 });
 
 test("polygon_edges", t => {
@@ -212,4 +244,19 @@ test("navmesh_find_path", t => {
         const path = mesh.findPath(from, to);
         t.deepEqual(path, expected);
     }
+});
+
+test("navmesh_performance", t => {
+    const start1 = Date.now();
+    const mesh = big_navmesh();
+    const elapsed1 = Date.now() - start1;
+
+    const start2 = Date.now();
+    const path = mesh.findPath([1, 1], [99, 99]);
+    const elapsed2 = Date.now() - start2;
+
+    t.assert(elapsed1 < 2000);
+    t.assert(elapsed2 < 40);
+
+    console.log(elapsed1, elapsed2);
 });
