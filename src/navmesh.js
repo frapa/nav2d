@@ -1,3 +1,4 @@
+import { uuid } from "uuidv4";
 import inside from "point-in-polygon";
 import { Vector, isclose, cross, dot } from "./math";
 
@@ -13,6 +14,7 @@ function _normalizePoint(point) {
 
 export class Edge {
     constructor(p1, p2) {
+        this._uuid = uuid();
         this.p1 = _normalizePoint(p1);
         this.p2 = _normalizePoint(p2);
     }
@@ -21,7 +23,7 @@ export class Edge {
         return this.p1.subtract(this.p2).length();
     }
 
-    on_edge(point) {
+    onEdge(point) {
         point = _normalizePoint(point);
         const direction = this.p1.subtract(this.p2);
         const point_vec = this.p1.subtract(point);
@@ -39,6 +41,7 @@ export class Edge {
 
 export class Polygon {
     constructor(points) {
+        this._uuid = uuid();
         this.points = points.map(_normalizePoint);
     }
 
@@ -68,15 +71,14 @@ export class Polygon {
         point = _normalizePoint(point);
         const poly_points = this.points.map(this._toPointArray);
         return (
-            inside(this._toPointArray(point), poly_points) ||
-            this.on_edge(point)
+            inside(this._toPointArray(point), poly_points) || this.onEdge(point)
         );
     }
 
-    on_edge(point) {
+    onEdge(point) {
         point = _normalizePoint(point);
         for (const edge of this.edges()) {
-            if (edge.on_edge(point)) return true;
+            if (edge.onEdge(point)) return true;
         }
 
         return false;
@@ -85,17 +87,17 @@ export class Polygon {
 
 export class NavMesh {
     constructor(polygons) {
-        this.polygons = polygons.map(points => Polygon(points));
+        this._uuid = uuid();
+        this.polygons = polygons.map(points => new Polygon(points));
         this._buildNeighbors();
     }
 
     _buildNeighbors() {
         this.polygons.forEach(polygon => (polygon.neighbors = []));
 
-        for (const i in this.polygons) {
+        for (let i = 0; i < this.polygons.length; i++) {
             const poly1 = this.polygons[i];
-            for (const j in this.polygons.slice(i)) {
-                const poly2 = this.polygons[j];
+            for (const poly2 of this.polygons.slice(i + 1)) {
                 if (this._areNeighbors(poly1, poly2)) {
                     poly1.neighbors.push(poly2);
                     poly2.neighbors.push(poly1);
@@ -105,12 +107,12 @@ export class NavMesh {
     }
 
     _areNeighbors(poly1, poly2) {
-        for (const point in poly1.points) {
-            if (poly2.on_edge(point)) return true;
+        for (const point of poly1.points) {
+            if (poly2.onEdge(point)) return true;
         }
 
-        for (const point in poly2.points) {
-            if (poly1.on_edge(point)) return true;
+        for (const point of poly2.points) {
+            if (poly1.onEdge(point)) return true;
         }
 
         return false;
@@ -119,5 +121,55 @@ export class NavMesh {
     findPath(from, to) {
         from = _normalizePoint(from);
         to = _normalizePoint(to);
+
+        return this._findPath(from, to);
+    }
+
+    _findPath(from, to) {
+        // This is the A* algorithm
+        const from_poly = this._findContainingPolygon(from);
+        const to_poly = this._findContainingPolygon(to);
+
+        if (from_poly === null || to_poly === null) return null;
+
+        const frontier = [from_poly];
+        const came_from = { [from_poly._uuid]: null };
+
+        while (frontier.length) {
+            const current = frontier.pop();
+            for (const next of current.neighbors) {
+                if (!came_from.hasOwnProperty(next._uuid)) {
+                    frontier.push(next);
+                    came_from[next._uuid] = current;
+                }
+            }
+        }
+
+        return this._reconstructPath(to_poly, came_from);
+    }
+
+    _findContainingPolygon(point) {
+        for (const poly of this.polygons) {
+            if (poly.contains(point)) return poly;
+        }
+
+        return null;
+    }
+
+    _reconstructPath(to, came_from) {
+        if (!came_from.hasOwnProperty(to._uuid)) {
+            // Disconnected
+            return null;
+        }
+
+        let current = to;
+
+        const path = [];
+        while (current !== null) {
+            path.push(current);
+            current = came_from[current._uuid];
+        }
+
+        return path.reverse();
     }
 }
