@@ -5,8 +5,12 @@
 This is a high-quality implementation of a 2D polygonal navigation mesh with A\* path finding
 and funneling (e.g. finding not only the mesh nodes but also the actual path across polygons).
 
+<div style="text-align: center">
+
 ![First path finding example](docs/images/path1.png)
 ![Second path finding example](docs/images/path2.png)
+
+</div>
 
 ## Why this package
 
