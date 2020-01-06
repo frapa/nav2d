@@ -23,4 +23,4 @@ const navmesh = new NavMesh([
 ```
 
 You can pass points as arrays `[x, y]`, as objects `{x:x, y:y}` or
-as `Vector(x, y)` objects.
+as `Point(x, y)` objects.

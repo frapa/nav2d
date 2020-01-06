@@ -22,23 +22,36 @@ export class Vector {
         return new Vector(this.x + other.x, this.y + other.y);
     }
 
-    subtract(other) {
+    sub(other) {
         other = this._normOther(other);
         return new Vector(this.x - other.x, this.y - other.y);
     }
 
-    mult(other) {
+    mul(other) {
         other = this._normOther(other);
         return new Vector(this.x * other.x, this.y * other.y);
     }
 
-    divide(other) {
+    div(other) {
         other = this._normOther(other);
         return new Vector(this.x / other.x, this.y / other.y);
     }
 
     length() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    equals(other) {
+        return isclose(this.x, other.x) && isclose(this.y, other.y);
+    }
+
+    angle(other) {
+        return Math.acos(dot(this, other) / (this.length() * other.length()));
+    }
+
+    counterclockwiseAngle(other) {
+        const angle = this.angle(other);
+        return cross(this, other) >= 0 ? angle : 2 * Math.PI - angle;
     }
 }
 

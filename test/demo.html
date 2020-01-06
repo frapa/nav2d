@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <title>Nav2d Demo</title>
+        <script src="https://unpkg.com/raphael@2.3.0/raphael.min.js"></script>
+        <script src="../dist/nav2d.bundle.js"></script>
+        <script>
+            function pointToPathString(points) {
+                return points.map(
+                    (p, i) => i == 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`
+                ).join("");
+            }
+
+            function init() {
+                const navmesh = new NavMesh([
+                    [[1, 1], [1, 100], [100, 1]],
+                    [[1, 100], [100, 1], [80, 80]],
+                    [[300, 50], [100, 1], [80, 80]],
+                    [[300, 50], [100, 1], [500, 1]],
+                    [[300, 50], [600, 30], [500, 1]],
+                    [[450, 40], [600, 30], [500, 100]],
+                    [[500, 100], [600, 30], [500, 180]],
+                    [[580, 200], [600, 30], [500, 180]],
+                    [[580, 200], [320, 270], [500, 180]],
+                    [[300, 50], [80, 80], [100, 100], [200, 150]],
+                    [[80, 80], [100, 100], [90, 150]],
+                    [[200, 150], [100, 100], [90, 150]],
+                    [[200, 150], [150, 210], [90, 150]],
+                    [[200, 150], [150, 210], [260, 130]],
+                    [[320, 270], [150, 210], [260, 130]],
+                    [[320, 270], [500, 180], [260, 130]],
+                    [
+                        [900, 800], [900, 700], [1000, 600], [1100, 700], [1100, 800],
+                        [1200, 800], [1200, 700], [1100, 550], [1000, 500], [900, 550], [800, 700], [800, 800],
+                    ],
+                ]);
+
+                const navPath1 = navmesh.findPath([50, 10], [550, 160]);
+                const navPath2 = navmesh.findPath([30, 70], [520, 70]);
+                const navPath3 = navmesh.findPath([850, 770], [1150, 770]);
+                console.log(navPath1, navPath2, navPath3);
+
+                const paper = Raphael(document.body, 1600, 1200);
+
+                for (const poly of navmesh.polygons) {
+                    const pathString = pointToPathString([...poly.points, poly.points[0]])
+                    const path = paper.path(pathString);
+                    path.attr("stroke", "#555");
+                    path.attr("fill", "#ddd");
+                    path.attr("stroke-width", "2");
+                }
+
+                let pathString = pointToPathString(navPath1);
+                let path = paper.path(pathString);
+                path.attr("stroke", "#ff0000");
+                path.attr("stroke-width", "3");
+
+                pathString = pointToPathString(navPath2);
+                path = paper.path(pathString);
+                path.attr("stroke", "#0000ff");
+                path.attr("stroke-width", "3");
+
+                pathString = pointToPathString(navPath3);
+                path = paper.path(pathString);
+                path.attr("stroke", "#00ff00");
+                path.attr("stroke-width", "3");
+            }
+        </script>
+    </head>
+    <body onload="init();">
+    </body>
+</html>

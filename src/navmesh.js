@@ -23,21 +23,86 @@ export class Edge {
     }
 
     length() {
-        return this.p1.subtract(this.p2).length();
+        return this.p1.sub(this.p2).length();
+    }
+
+    direction() {
+        return this.p1.sub(this.p2);
     }
 
     onEdge(point) {
         point = _normalizePoint(point);
-        const direction = this.p1.subtract(this.p2);
-        const point_vec = this.p1.subtract(point);
+        const pointVec = this.p1.sub(point);
 
-        const is_collinear = isclose(cross(direction, point_vec), 0);
-        if (!is_collinear) return false;
+        if (!this.parallel(pointVec)) return false;
 
         // test that it's not only collinear, but falls between p1 and p2
-        const len = direction.length();
-        const component = dot(direction, point_vec) / (len * len);
+        const direction = this.direction();
+        const len = this.length();
+        const component = dot(direction, pointVec) / (len * len);
         return component >= 0 && component <= 1;
+    }
+
+    parallel(other) {
+        const otherDirection =
+            other instanceof Vector ? other : other.p1.sub(other.p2);
+        return isclose(cross(this.direction(), otherDirection), 0);
+    }
+
+    collinear(other) {
+        const direction = this.direction();
+        const otherVec1 = this.p1.sub(other.p1);
+        const otherVec2 = this.p1.sub(other.p2);
+        return (
+            isclose(cross(direction, otherVec1), 0) &&
+            isclose(cross(direction, otherVec2), 0)
+        );
+    }
+
+    overlap(other) {
+        if (!this.collinear(other)) {
+            throw new Error(
+                "Cannot compute overlap of two non-collinear edges."
+            );
+        }
+
+        let endpoints = [];
+
+        if (this.onEdge(other.p1)) endpoints.push(other.p1);
+        if (this.onEdge(other.p2)) endpoints.push(other.p2);
+        if (other.onEdge(this.p1)) endpoints.push(this.p1);
+        if (other.onEdge(this.p2)) endpoints.push(this.p2);
+
+        // enpoints can also be the an array with twice the same point,
+        // which is fine as it yields a zero-length edge
+        if (endpoints.length > 2) {
+            const newEndpoints = [];
+            for (let i = 0; i < endpoints.length; i++) {
+                const point = endpoints[i];
+                const duplicate = endpoints
+                    .slice(i + 1)
+                    .find(p => point !== p && point.equals(p));
+                if (duplicate !== undefined) {
+                    newEndpoints.push(point);
+                }
+            }
+            endpoints = newEndpoints;
+        }
+
+        if (!endpoints.length)
+            endpoints = [
+                [0, 0],
+                [0, 0],
+            ];
+
+        return new Edge(...endpoints);
+    }
+
+    equals(other) {
+        return (
+            (this.p1.equals(other.p1) && this.p2.equals(other.p2)) ||
+            (this.p1.equals(other.p2) && this.p2.equals(other.p1))
+        );
     }
 }
 
@@ -45,10 +110,10 @@ export class Polygon {
     constructor(points) {
         this._uuid = uuid();
         this.points = points.map(_normalizePoint);
-        this.bounds = this._compute_bounds();
+        this.bounds = this._computeBounds();
     }
 
-    _compute_bounds() {
+    _computeBounds() {
         return this.points.reduce(
             (a, p) => [
                 Math.min(p.x, a[0]),
@@ -75,14 +140,15 @@ export class Polygon {
     centroid() {
         return this.points
             .reduce((acc, point) => acc.add(point), new Vector(0, 0))
-            .divide(this.points.length);
+            .div(this.points.length);
     }
 
     contains(point) {
         point = _normalizePoint(point);
-        const poly_points = this.points.map(this._toPointArray);
+        const polyPoints = this.points.map(this._toPointArray);
         return (
-            inside(this._toPointArray(point), poly_points) || this.onEdge(point)
+            inside(this._toPointArray(point), polyPoints) ||
+            !!this.onEdge(point)
         );
     }
 
@@ -93,10 +159,23 @@ export class Polygon {
     onEdge(point) {
         point = _normalizePoint(point);
         for (const edge of this.edges()) {
-            if (edge.onEdge(point)) return true;
+            if (edge.onEdge(point)) return edge;
         }
 
-        return false;
+        return null;
+    }
+
+    touches(otherEdge) {
+        for (const edge of this.edges()) {
+            if (
+                (edge.onEdge(otherEdge.p1) || edge.onEdge(otherEdge.p2)) &&
+                edge.collinear(otherEdge)
+            ) {
+                return edge;
+            }
+        }
+
+        return null;
     }
 
     boundsSize() {
@@ -111,15 +190,16 @@ export class NavMesh {
         this.polygons = this._triangulate(polygons).map(
             points => new Polygon(points)
         );
+        this.edges = {};
         this._buildNeighbors();
     }
 
     _triangulate(polygons) {
         const triangles = [];
         for (const poly of polygons) {
-            const triangles_indices = earcut(this._flatten(poly));
-            for (let i = 0; i < triangles_indices.length / 3; i++) {
-                const indices = triangles_indices.slice(i * 3, i * 3 + 3);
+            const trianglesIndices = earcut(this._flatten(poly));
+            for (let i = 0; i < trianglesIndices.length / 3; i++) {
+                const indices = trianglesIndices.slice(i * 3, i * 3 + 3);
                 triangles.push(indices.map(j => poly[j]));
             }
         }
@@ -127,21 +207,19 @@ export class NavMesh {
     }
 
     _flatten(points) {
-        const flat_points = [];
+        const flatPoints = [];
         for (const point of points) {
             if (point instanceof Array) {
-                flat_points.push(...point);
-            } else if (point instanceof Vector) {
-                flat_points.push(point.x, point.y);
-            } else if ("x" in point && "y" in point) {
-                flat_points.push(point.x, point.y);
+                flatPoints.push(...point);
+            } else {
+                flatPoints.push(point.x, point.y);
             }
         }
-        return flat_points;
+        return flatPoints;
     }
 
     _buildNeighbors() {
-        this.polygons.forEach(polygon => (polygon.neighbors = []));
+        this.polygons.forEach(polygon => (polygon.neighbors = {}));
 
         // Use quad tree because the naive approach of iterating
         // with two nested for loops over the polygons has performance
@@ -162,56 +240,57 @@ export class NavMesh {
                 const poly2 = poly2wrap.polygon;
 
                 if (poly1 === poly2) continue;
-                if (poly1.neighbors.includes(poly2)) continue;
+                if (poly1.neighbors.hasOwnProperty(poly2._uuid)) continue;
 
-                if (this._areNeighbors(poly1, poly2)) {
-                    poly1.neighbors.push(poly2);
-                    poly2.neighbors.push(poly1);
+                const portal = this._computePortal(poly1, poly2);
+                if (portal !== null && portal.length() > 0) {
+                    poly1.neighbors[poly2._uuid] = { polygon: poly2, portal };
+                    poly2.neighbors[poly1._uuid] = { polygon: poly1, portal };
                 }
             }
         }
     }
 
-    _areNeighbors(poly1, poly2) {
-        for (const point of poly1.points) {
-            if (poly2.onEdge(point)) return true;
+    _computePortal(poly1, poly2) {
+        for (const edge1 of poly1.edges()) {
+            const edge2 = poly2.touches(edge1);
+            if (edge2 !== null) {
+                return edge1.overlap(edge2);
+            }
         }
 
-        for (const point of poly2.points) {
-            if (poly1.onEdge(point)) return true;
-        }
-
-        return false;
+        return null;
     }
 
     findPath(from, to) {
         from = _normalizePoint(from);
         to = _normalizePoint(to);
 
-        return this._findPath(from, to);
+        const path = this._findPath(from, to);
+        return path && this._funnel(from, to, path);
     }
 
     _findPath(from, to) {
         // This is the A* algorithm
-        const from_poly = this._findContainingPolygon(from);
-        const to_poly = this._findContainingPolygon(to);
+        const fromPoly = this._findContainingPolygon(from);
+        const toPoly = this._findContainingPolygon(to);
 
-        if (from_poly === null || to_poly === null) return null;
+        if (fromPoly === null || toPoly === null) return null;
 
-        const frontier = [from_poly];
-        const came_from = { [from_poly._uuid]: null };
+        const frontier = [fromPoly];
+        const cameFrom = { [fromPoly._uuid]: null };
 
         while (frontier.length) {
             const current = frontier.pop();
-            for (const next of current.neighbors) {
-                if (!came_from.hasOwnProperty(next._uuid)) {
-                    frontier.push(next);
-                    came_from[next._uuid] = current;
+            for (const next of Object.values(current.neighbors)) {
+                if (!cameFrom.hasOwnProperty(next.polygon._uuid)) {
+                    frontier.push(next.polygon);
+                    cameFrom[next.polygon._uuid] = current;
                 }
             }
         }
 
-        return this._reconstructPath(to_poly, came_from);
+        return this._reconstructPath(toPoly, cameFrom);
     }
 
     _findContainingPolygon(point) {
@@ -222,8 +301,8 @@ export class NavMesh {
         return null;
     }
 
-    _reconstructPath(to, came_from) {
-        if (!came_from.hasOwnProperty(to._uuid)) {
+    _reconstructPath(to, cameFrom) {
+        if (!cameFrom.hasOwnProperty(to._uuid)) {
             // Disconnected
             return null;
         }
@@ -233,11 +312,93 @@ export class NavMesh {
         const path = [];
         while (current !== null) {
             path.push(current);
-            current = came_from[current._uuid];
+            current = cameFrom[current._uuid];
         }
 
         return path.reverse();
     }
 
-    _funnel() {}
+    _funnel(from, to, path) {
+        if (path.length === 0) {
+            throw new Error("Path cannot be empty.");
+        } else if (path.length === 1) {
+            return [from, to];
+        }
+
+        const points = [from];
+        let edge1 = null;
+        let edge2 = null;
+
+        for (let i = 0; i < path.length - 1; i++) {
+            const poly = path[i];
+            const next = path[i + 1];
+            const portal = poly.neighbors[next._uuid].portal;
+
+            // Calculate portal edges
+            let [newEdge1, newEdge2] = this._pointPortalEdges(from, portal);
+
+            if (edge1 !== null && edge2 !== null) {
+                // Shrink funnel edges
+                newEdge1 = this._funnelEdge(edge1, edge2, newEdge1);
+                newEdge2 = this._funnelEdge(edge2, edge1, newEdge2);
+
+                // If the
+                if (newEdge1 === null || newEdge2 === null) {
+                    const edge = newEdge1 === null ? edge2 : edge1;
+                    const newStartIndex = path.indexOf(
+                        [...path].reverse().find(p => p.contains(edge.p2))
+                    );
+                    points.push(
+                        ...this._funnel(edge.p2, to, path.slice(newStartIndex))
+                    );
+                    break;
+                }
+            }
+
+            edge1 = newEdge1;
+            edge2 = newEdge2;
+
+            if (i === path.length - 2) {
+                const toEdge = new Edge(from, to);
+                let newToEdge = this._funnelEdge(edge1, edge2, toEdge);
+                if (newToEdge === edge1) {
+                    points.push(edge1.p2);
+                } else if (newToEdge === null) {
+                    points.push(edge2.p2);
+                }
+
+                points.push(to);
+            }
+        }
+
+        return points;
+    }
+
+    _pointPortalEdges(point, portal) {
+        const vec1 = portal.p1.sub(point);
+        const vec2 = portal.p2.sub(point);
+        // The funnel is between vec1 and vec2 in
+        // counterclockwise direction, so the ordering counts.
+        // and can be assessed with the sign of the
+        // cross product.
+        if (cross(vec1, vec2) < 0) {
+            return [new Edge(point, portal.p2), new Edge(point, portal.p1)];
+        } else {
+            return [new Edge(point, portal.p1), new Edge(point, portal.p2)];
+        }
+    }
+
+    _funnelEdge(edge1, edge2, edge) {
+        const vec1 = edge1.direction();
+        const vec2 = edge2.direction();
+        const vector = edge.direction();
+        // If the cross product has different sign,
+        // the vector would enlarge the funnel
+        // -> return current vector as funnel edge.
+        if (cross(vec1, vec2) * cross(vec1, vector) < 0) return edge1;
+        // If the vector is inside the funnel, shrink funnel.
+        if (vec1.angle(vector) <= vec1.angle(vec2)) return edge;
+        // Vector would close the funnel, return null.
+        return null;
+    }
 }
