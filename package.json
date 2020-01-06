@@ -1,6 +1,6 @@
 {
   "name": "nav2d",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "2d navigation meshes with pathfinding and funneling",
   "main": "dist/nav2d.bundle.js",
   "unpkg": "dist/nav2d.bundle.js",

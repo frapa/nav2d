@@ -337,7 +337,7 @@ test("navmesh_performance", t => {
     const elapsed2 = Date.now() - start2;
 
     t.assert(elapsed1 < 2000);
-    t.assert(elapsed2 < 40);
+    t.assert(elapsed2 < 500);
 
     console.log(elapsed1, elapsed2);
 });
