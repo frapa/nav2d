@@ -8,7 +8,7 @@ and funneling (e.g. finding not only the mesh nodes but also the actual path acr
 ![Path finding examples](docs/images/paths.png)
 
 Image: different paths on simple mesh (top) and another path in an automatically triangulated
-mesh.
+mesh (bottom).
 
 ## Why this package
 
