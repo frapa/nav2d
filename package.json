@@ -1,6 +1,6 @@
 {
   "name": "nav2d",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "2d navigation meshes with pathfinding and funneling",
   "repository": "https://github.com/frapa/nav2d",
   "main": "dist/nav2d.bundle.js",
