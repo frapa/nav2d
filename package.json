@@ -1,10 +1,11 @@
 {
   "name": "nav2d",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "2d navigation meshes with pathfinding and funneling",
+  "repository": "https://github.com/frapa/nav2d",
   "main": "dist/nav2d.bundle.js",
   "unpkg": "dist/nav2d.bundle.js",
-  "module": "src",
+  "module": "src/nav2d.js",
   "scripts": {
     "build": "webpack",
     "prepublish": "npm run build",

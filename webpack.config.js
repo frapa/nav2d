@@ -1,12 +1,14 @@
-var path = require('path');
-var webpack = require('webpack');
+var path = require("path");
 
 module.exports = {
-    mode: 'production',
-    entry: './src/nav2d.js',
+    mode: "production",
+    entry: "./src/nav2d.js",
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'nav2d.bundle.js'
+        path: path.resolve(__dirname, "dist"),
+        filename: "nav2d.bundle.js",
+        library: "nav2d",
+        libraryTarget: "umd",
+        globalObject: `(typeof self !== 'undefined' ? self : this)`,
     },
     module: {
         rules: [
@@ -14,12 +16,13 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
+                    loader: "babel-loader",
                     options: {
-                        presets: ['@babel/preset-env'],
+                        presets: ["@babel/preset-env"],
                     },
                 },
             },
-        ]
+        ],
     },
+    devtool: "source-map",
 };

@@ -93,7 +93,11 @@ This is basically it. This package does nothing more and nothing less.
 
 ## Changelog
 
-### 0.1.0 - Jan 6, 2019
+### 0.1.1 - Jan 8, 2020
+
+-   Added UMD module loader.
+
+### 0.1.0 - Jan 6, 2020
 
 -   First release which includes:
     -   Simple breath-first search algorithm
