@@ -93,6 +93,10 @@ This is basically it. This package does nothing more and nothing less.
 
 ## Changelog
 
+### 0.1.2 - Jan 8, 2020
+
+-   Reduced bundle size by removing dependencies.
+
 ### 0.1.1 - Jan 8, 2020
 
 -   Added UMD module loader.
