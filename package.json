@@ -6,6 +6,20 @@
   "main": "dist/nav2d.bundle.js",
   "unpkg": "dist/nav2d.bundle.js",
   "module": "src/nav2d.js",
+  "keywords": [
+    "navigation mesh",
+    "nav",
+    "mesh",
+    "navmesh",
+    "navigation",
+    "polygons",
+    "polygonal navigation mesh",
+    "pathfinding",
+    "path finding",
+    "astar",
+    "funnel",
+    "AI"
+  ],
   "scripts": {
     "build": "webpack",
     "prepublish": "npm run build",
