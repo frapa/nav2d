@@ -10,7 +10,7 @@ function _normalizePoint(point) {
         return new Vector(...point);
     } else if (point instanceof Vector) {
         return point;
-    } else if ("x" in point && "y" in point) {
+    } else if (point.hasOwnProperty("x") && point.hasOwnProperty("y")) {
         return new Vector(point.x, point.y);
     }
 }

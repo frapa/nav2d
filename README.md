@@ -93,6 +93,10 @@ This is basically it. This package does nothing more and nothing less.
 
 ## Changelog
 
+### 0.1.3 - Jan 12, 2020
+
+-   Fixed bug that caused some kinds of polygon input to throw an error.
+
 ### 0.1.2 - Jan 8, 2020
 
 -   Reduced bundle size by removing dependencies.
