@@ -77,7 +77,7 @@ export class Edge {
         // which is fine as it yields a zero-length edge
         if (endpoints.length > 2) {
             endpoints = endpoints.filter(
-                (p, i) => endpoints.find(op => op.equals(p)) == i
+                (p, i) => endpoints.findIndex(op => op.equals(p)) == i
             );
         }
 
