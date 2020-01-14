@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5 - Jan 14, 2020
+
+-   Fixed bug in the removal of duplicate points from list.
+    This caused some polygons not to be recognized as neighbors.
+
 ## 0.1.4 - Jan 14, 2020
 
 -   Fixed bug causing polygons touching each other in only one point to break the navigation mesh.

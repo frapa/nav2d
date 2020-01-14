@@ -76,17 +76,9 @@ export class Edge {
         // enpoints can also be the an array with twice the same point,
         // which is fine as it yields a zero-length edge
         if (endpoints.length > 2) {
-            const newEndpoints = [];
-            for (let i = 0; i < endpoints.length; i++) {
-                const point = endpoints[i];
-                const duplicate = endpoints
-                    .slice(i + 1)
-                    .find(p => point !== p && point.equals(p));
-                if (duplicate !== undefined) {
-                    newEndpoints.push(point);
-                }
-            }
-            endpoints = newEndpoints;
+            endpoints = endpoints.filter(
+                (p, i) => endpoints.findIndex(op => op.equals(p)) === i
+            );
         }
 
         if (!endpoints.length) {
