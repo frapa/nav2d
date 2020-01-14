@@ -53,6 +53,10 @@ export class Vector {
         const angle = this.angle(other);
         return cross(this, other) >= 0 ? angle : 2 * Math.PI - angle;
     }
+
+    toString() {
+        return `{ x: ${this.x}, y: ${this.y} }`;
+    }
 }
 
 export function dot(a, b) {

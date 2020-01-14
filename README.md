@@ -93,6 +93,10 @@ This is basically it. This package does nothing more and nothing less.
 
 ## Changelog
 
+### 0.1.4 - Jan 14, 2020
+
+-   Fixed bug causing polygons touching each other in only one point to break the navigation mesh.
+
 ### 0.1.3 - Jan 12, 2020
 
 -   Fixed bug that caused some kinds of polygon input to throw an error.

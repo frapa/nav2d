@@ -89,11 +89,14 @@ export class Edge {
             endpoints = newEndpoints;
         }
 
-        if (!endpoints.length)
+        if (!endpoints.length) {
             endpoints = [
                 [0, 0],
                 [0, 0],
             ];
+        } else if (endpoints.length == 1) {
+            endpoints = [endpoints[0], endpoints[0]];
+        }
 
         return new Edge(...endpoints);
     }

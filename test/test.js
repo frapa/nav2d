@@ -287,6 +287,44 @@ test("polygon_contains", t => {
     t.false(polygon().contains([0, 12.001]));
 });
 
+test("navmesh_touch_only_one_point", t => {
+    // If the mash has polygon touching only in one point,
+    // the case should be handled correcly, and not throw an error
+    const mesh = new NavMesh([
+        [
+            [0, 0],
+            [0, 200],
+            [200, 0],
+        ],
+        [
+            [0, 200],
+            [0, 490],
+            [80, 490],
+        ],
+        [
+            [0, 200],
+            [170, 170],
+            [200, 0],
+        ],
+        [
+            [60, 210],
+            [180, 190],
+            [200, 210],
+        ],
+        [
+            [0, 200],
+            [80, 490],
+            [51.0634328358209, 190.98880597014926],
+        ],
+        [
+            [54.77707006369427, 229.36305732484075],
+            [200, 210],
+            [52.903225806451616, 210],
+        ],
+    ]);
+    t.pass();
+});
+
 test("navmesh_neighbours", t => {
     const mesh = navmesh();
     const [poly1, poly2, poly3, poly4] = mesh.polygons;

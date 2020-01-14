@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "build": "webpack",
-    "prepublish": "npm run build",
+    "prepublish": "npm test && npm run build",
     "test": "nyc ava --verbose"
   },
   "devDependencies": {
