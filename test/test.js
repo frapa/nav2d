@@ -160,6 +160,10 @@ test("vector_counterclockwise_angle", t => {
     );
 });
 
+test("vector_to_string", t => {
+    t.true(vector() == "{ x: 5, y: 6 }");
+});
+
 test("edge_length", t => {
     t.assert(edge().length() == 5);
 });
@@ -260,6 +264,25 @@ test("polygon_edges", t => {
 test("polygon_centroid", t => {
     const centroid = polygon().centroid();
     t.deepEqual(centroid, new Vector(4, 4));
+});
+
+test("polygon_centroid_distance", t => {
+    t.true(isclose(polygon().centroidDistance(polygon()), 0));
+
+    const poly1 = new Polygon([
+        [0, 0],
+        [0, 10],
+        [10, 10],
+        [10, 0],
+    ]);
+    const poly2 = new Polygon([
+        [25, 15],
+        [30, 20],
+        [25, 25],
+        [20, 20],
+    ]);
+
+    t.true(isclose(poly1.centroidDistance(poly2), 25));
 });
 
 test("polygon_on_edge", t => {
@@ -371,11 +394,21 @@ test("navmesh_performance", t => {
     const elapsed1 = Date.now() - start1;
 
     const start2 = Date.now();
-    const path = mesh.findPath([1, 1], [99, 99]);
+    const path1 = mesh.findPath([1, 1], [99, 99]);
     const elapsed2 = Date.now() - start2;
 
-    t.assert(elapsed1 < 2000);
-    t.assert(elapsed2 < 500);
+    const start3 = Date.now();
+    const path2 = mesh.findPath([1, 1], [19, 19]);
+    const elapsed3 = Date.now() - start3;
 
-    console.log(elapsed1, elapsed2);
+    const start4 = Date.now();
+    const path3 = mesh.findPath([1, 1], [299, 299]);
+    const elapsed4 = Date.now() - start4;
+
+    t.assert(elapsed1 < 2000);
+    t.assert(elapsed2 < 10);
+    t.assert(elapsed3 < 15);
+    t.assert(elapsed4 < 5);
+
+    console.log(elapsed1, elapsed2, elapsed3, elapsed4);
 });

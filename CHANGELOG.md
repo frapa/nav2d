@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0
+
+-   Added linting.
+-   Added function to calculate centroid distance among polygons.
+-   Drastically improved performances of the funnel algorithm (100x speedup or more).
+    This brings execution speed from about 500 ms to 1 ms (in an example test)
+    for this part of the algorithm.
+-   Use quadtree also for locating start and end polygon and not only
+    for building the neighbors graph. This leads to a 2 order of magnitude
+    speed-up for this part of path finding. This brings execution speed from
+    30 ms to < 1 ms for an example test case.
+-   Execution speed reduced by 50 times for an example test case with about 1000 polygons.
+
 ## 0.1.5 - Jan 14, 2020
 
 -   Fixed bug in the removal of duplicate points from list.

@@ -138,6 +138,11 @@ export class Polygon {
             .div(this.points.length);
     }
 
+    centroidDistance(other) {
+        const centroidVector = this.centroid().sub(other.centroid());
+        return centroidVector.length();
+    }
+
     contains(point) {
         point = _normalizePoint(point);
         const polyPoints = this.points.map(this._toPointArray);
@@ -186,6 +191,7 @@ export class NavMesh {
             points => new Polygon(points)
         );
         this.edges = {};
+        this._buildQuadtree();
         this._buildNeighbors();
     }
 
@@ -213,25 +219,27 @@ export class NavMesh {
         return flatPoints;
     }
 
-    _buildNeighbors() {
-        this.polygons.forEach(polygon => (polygon.neighbors = {}));
-
+    _buildQuadtree() {
         // Use quad tree because the naive approach of iterating
         // with two nested for loops over the polygons has performance
         // n*lon(n), which for a 30x30 grid already takes a minute.
         // This thing, for the same grid, takes 1 second, and scales linearly.
-        let qt = QuadTree(-Infinity, -Infinity, Infinity, Infinity);
+        this.qt = QuadTree(-Infinity, -Infinity, Infinity, Infinity);
         for (const poly of this.polygons) {
-            qt.put({
+            this.qt.put({
                 ...poly.boundsSize(),
                 polygon: poly,
             });
         }
+    }
+
+    _buildNeighbors() {
+        this.polygons.forEach(polygon => (polygon.neighbors = {}));
 
         for (let i = 0; i < this.polygons.length; i++) {
             const poly1 = this.polygons[i];
 
-            for (const poly2wrap of qt.get(poly1.boundsSize())) {
+            for (const poly2wrap of this.qt.get(poly1.boundsSize())) {
                 const poly2 = poly2wrap.polygon;
 
                 if (poly1 === poly2) continue;
@@ -258,10 +266,13 @@ export class NavMesh {
     }
 
     findPath(from, to) {
+        // console.log("---");
         from = _normalizePoint(from);
         to = _normalizePoint(to);
 
+        // const s = Date.now();
         const path = this._findPath(from, to);
+        // console.log("find", Date.now() - s);
         return path && this._funnel(from, to, path);
     }
 
@@ -274,23 +285,40 @@ export class NavMesh {
 
         const frontier = [fromPoly];
         const cameFrom = { [fromPoly._uuid]: null };
+        // const cost = { [fromPoly._uuid]: 0 };
+        // const s = Date.now();
 
         while (frontier.length) {
             const current = frontier.pop();
+
+            if (current._uuid === toPoly._uuid) {
+                break;
+            }
+
             for (const next of Object.values(current.neighbors)) {
+                // const nextCost = cost[current._uuid];
+
                 if (!cameFrom.hasOwnProperty(next.polygon._uuid)) {
                     frontier.push(next.polygon);
                     cameFrom[next.polygon._uuid] = current;
                 }
             }
         }
+        // console.log("after", Date.now() - s, Object.keys(cameFrom).length);
 
         return this._reconstructPath(toPoly, cameFrom);
     }
 
     _findContainingPolygon(point) {
-        for (const poly of this.polygons) {
-            if (poly.contains(point)) return poly;
+        const halfSize = point.x * 0.01;
+        const bounds = {
+            x: point.x * 0.99 - halfSize,
+            y: point.y * 0.99 - halfSize,
+            w: 2 * halfSize,
+            h: 2 * halfSize,
+        };
+        for (const poly of this.qt.get(bounds)) {
+            if (poly.polygon.contains(point)) return poly.polygon;
         }
 
         return null;
@@ -337,15 +365,18 @@ export class NavMesh {
                 newEdge1 = this._funnelEdge(edge1, edge2, newEdge1);
                 newEdge2 = this._funnelEdge(edge2, edge1, newEdge2);
 
-                // If the
+                // If the old edges are not set, than we are at the start of the algorithm,
+                // and we need to set the
                 if (newEdge1 === null || newEdge2 === null) {
                     const edge = newEdge1 === null ? edge2 : edge1;
-                    const newStartIndex = path.indexOf(
-                        [...path].reverse().find(p => p.contains(edge.p2))
+                    const newPath = this._splitAt(
+                        // We only need to check the polygon up to now, not the future
+                        // ones. This can have serious performance implications,
+                        // as the function is recursive.
+                        path.slice(0, i + 1),
+                        edge.p2
                     );
-                    points.push(
-                        ...this._funnel(edge.p2, to, path.slice(newStartIndex))
-                    );
+                    points.push(...this._funnel(edge.p2, to, newPath));
                     break;
                 }
             }
@@ -353,6 +384,8 @@ export class NavMesh {
             edge1 = newEdge1;
             edge2 = newEdge2;
 
+            // If we are at the end of the path,
+            // just add the last edge, which is from -> to
             if (i === path.length - 2) {
                 const toEdge = new Edge(from, to);
                 let newToEdge = this._funnelEdge(edge1, edge2, toEdge);
@@ -381,6 +414,13 @@ export class NavMesh {
         } else {
             return [new Edge(point, portal.p1), new Edge(point, portal.p2)];
         }
+    }
+
+    _splitAt(path, point) {
+        const newStartIndex = path.indexOf(
+            path.reverse().find(p => p.contains(point))
+        );
+        return path.slice(newStartIndex);
     }
 
     _funnelEdge(edge1, edge2, edge) {
