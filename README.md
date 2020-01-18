@@ -1,6 +1,7 @@
 # Nav2d
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![minzipped size](https://badgen.net/bundlephobia/minzip/nav2d)](https://bundlephobia.com/result?p=nav2d)
 ![Tests](https://github.com/frapa/nav2d/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/frapa/nav2d/branch/master/graph/badge.svg)](https://codecov.io/gh/frapa/nav2d)
 
