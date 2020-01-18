@@ -23,12 +23,14 @@
   "scripts": {
     "build": "webpack",
     "prepublish": "npm test && npm run build",
-    "test": "nyc ava --verbose"
+    "test": "npm run lint && nyc ava --verbose",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.7.7",
     "ava": "^1.0.0",
     "babel-loader": "^8.0.6",
+    "eslint": "^6.8.0",
     "esm": "^3.2.25",
     "nyc": "^15.0.0",
     "webpack": "^4.41.5",
