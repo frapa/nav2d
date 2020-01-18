@@ -2,6 +2,7 @@
 
 ![Tests](https://github.com/frapa/nav2d/workflows/Tests/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/frapa/nav2d/branch/master/graph/badge.svg)](https://codecov.io/gh/frapa/nav2d)
 
 This is a high-quality implementation of a 2D polygonal navigation mesh with A\* path finding
 and funneling (e.g. finding not only the mesh nodes but also the actual path across polygons).
