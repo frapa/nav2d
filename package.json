@@ -24,12 +24,14 @@
     "build": "webpack",
     "prepublish": "npm test && npm run build",
     "test": "npm run lint && nyc ava --verbose",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.7.7",
     "ava": "^1.0.0",
     "babel-loader": "^8.0.6",
+    "codecov": "^3.6.1",
     "eslint": "^6.8.0",
     "esm": "^3.2.25",
     "nyc": "^15.0.0",
