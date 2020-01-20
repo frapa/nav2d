@@ -26,29 +26,33 @@ function polygon() {
     ]);
 }
 
-function navmesh() {
-    return new NavMesh([
+function navmesh(costFunc = null, heuristicFunc = null) {
+    return new NavMesh(
         [
-            [0, 0],
-            [0, 12],
-            [12, 0],
+            [
+                [0, 0],
+                [0, 12],
+                [12, 0],
+            ],
+            [
+                [12, 8],
+                [12, 4],
+                [16, 6],
+            ],
+            [
+                [12, 0],
+                [6, 6],
+                [12, 6],
+            ],
+            [
+                [100, 100],
+                [110, 100],
+                [100, 110],
+            ],
         ],
-        [
-            [12, 8],
-            [12, 4],
-            [16, 6],
-        ],
-        [
-            [12, 0],
-            [6, 6],
-            [12, 6],
-        ],
-        [
-            [100, 100],
-            [110, 100],
-            [100, 110],
-        ],
-    ]);
+        costFunc,
+        heuristicFunc
+    );
 }
 
 function big_navmesh() {
@@ -202,11 +206,7 @@ test("edge_overlap", t => {
             .equals(edge())
     );
 
-    t.true(
-        edge()
-            .overlap(new Edge([-6, -8], [-3, -4]))
-            .equals(new Edge([0, 0], [0, 0]))
-    );
+    t.true(edge().overlap(new Edge([-6, -8], [-3, -4])) == null);
 
     t.throws(() => edge().overlap(new Edge([0, 0], [1, 0])));
 });
@@ -374,6 +374,11 @@ test("navmesh_find_path", t => {
             [new Vector(1, 1), new Vector(14, 6)],
         ],
         [
+            [1, 1],
+            [3, 3],
+            [new Vector(1, 1), new Vector(3, 3)],
+        ],
+        [
             [2, 1],
             [8, 5],
             [new Vector(2, 1), new Vector(8, 5)],
@@ -406,9 +411,39 @@ test("navmesh_performance", t => {
     const elapsed4 = Date.now() - start4;
 
     t.assert(elapsed1 < 2000);
-    t.assert(elapsed2 < 10);
-    t.assert(elapsed3 < 15);
-    t.assert(elapsed4 < 5);
+    t.assert(elapsed2 < 20);
+    t.assert(elapsed3 < 10);
+    t.assert(elapsed4 < 50);
 
     console.log(elapsed1, elapsed2, elapsed3, elapsed4);
+});
+
+test("navmesh_heuristic", t => {
+    let count = 0;
+    const mesh = navmesh(null, (poly, to) => {
+        t.true(poly instanceof Polygon);
+        t.true(to instanceof Polygon);
+
+        count++;
+        return 0;
+    });
+
+    const path = mesh.findPath([1, 1], [14, 6]);
+    t.deepEqual(path, [new Vector(1, 1), new Vector(14, 6)]);
+    t.true(count == 1);
+});
+
+test("navmesh_cost", t => {
+    let count = 0;
+    const mesh = navmesh((a, b, portal) => {
+        t.true(a instanceof Polygon);
+        t.true(b instanceof Polygon);
+        t.true(portal instanceof Edge);
+        count++;
+        return 1;
+    });
+
+    const path = mesh.findPath([1, 1], [14, 6]);
+    t.deepEqual(path, [new Vector(1, 1), new Vector(14, 6)]);
+    t.true(count == 3);
 });

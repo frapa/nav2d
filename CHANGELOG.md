@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0
+
+-   Implemented high-performance A\* instead of breadth first search.
+    A\*, in contrast to breadth first search, correctly takes distances
+    among polygons into account and not only the number of steps.
+    This allows the path finding to correctly handle areas with different
+    polygon densities and avoid weird paths is in cases.
+    Distances are approximated using the polygon centroid-to-centroid
+    distance by default. A\* is also fast, because it avoid computing paths
+    to polygons in "wrong" directions, and therefore typically converges faster.
+-   Cost and heuristic functions can be customized.
+-   More tests.
+-   Updated documentation.
+
 ## 0.2.0
 
 -   Added linting.
@@ -46,6 +60,6 @@
 -   Some performance optimizations were already implemented (i.e. quad-tree
     neighbor search) to make the package decently fast when the polygon count
     is below about 1000.
--   Due to breath-first search the package is not yet very fast, for a 1000 polygon
+-   Due to breadth-first search the package is not yet very fast, for a 1000 polygon
     mash the search can take up to 500 ms. Expect this to improve as we switch to
     more efficient search algorithms.

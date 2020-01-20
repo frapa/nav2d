@@ -89,7 +89,120 @@ As you can see from the output, thanks to the funnel algorithm, the path will on
 contain the necessary path points (in this case a straight line). If no path can be
 found (disconnected islands or endpoints outside the mesh) `null` will be returned.
 
+To find the path, a optimized A\* implementation is used. You can override the default
+the cost and heuristic functions (or only one of the two by passing `null`), by passing them to the
+`NavMesh` constructor. For example, to implement a simpler breadth first search, we can do:
+
+```javascript
+const costFunc = (polygon1, polygon2, portal) => 1;
+const heuristicFunc = () => (polygon, to) => 0;
+const navmesh = new NavMesh([...], costFunc, heuristicFunc);
+// Use as before
+```
+
+Instead, to implement Dijkstra’s Algorithm, you can:
+
+```javascript
+const heuristicFunc = () => (polygon, to) => 0;
+const navmesh = new NavMesh(
+    [...],
+    null, // if null, the default will be used */
+    heuristicFunc
+);
+```
+
+([Look here](https://www.redblobgames.com/pathfinding/a-star/introduction.html)
+for an nice explanation of the algorithms above)
+
+The cost function takes two neighboring polygons and a portal as parameters and
+returns the cost to go from the first to the second. Both polygons are `Polygon` objects.
+The portal is the edge shared between the two polygons.
+
+The heuristic function takes two polygon: a polygon on the path and the final polygon,
+and returns an estimation of the distance between the two. Both of these are `Polygon` objects.
+
+> **Note:** The default functions compute the distance between polygons using the
+> `.centroidDistance()` method (see below). This computes the Cartesian distance
+> between the centroids.
+
 This is basically it. This package does nothing more and nothing less.
+
+## API Reference
+
+`Point` or `Vector` (aliases)
+
+> **Note:** In all places where points are accepted, `nav2d` also accepts
+> arrays `[x, y]` or `{ x: x, y: y }` objects.
+
+Properties:
+
+-   `x` - X coordinate
+-   `y` - Y coordinate
+
+Methods:
+
+-   `Vector(x, y)` - Construct vector or point.
+-   `length()` - Vector length.
+-   `add(other)` - Add vectors, return new vector.
+-   `sub(other)` - Subtract vectors, return new vector.
+-   `mul(other)` - Multiply vectors, return new vector.
+-   `div(other)` - Divide vectors, return new vector.
+-   `equals(other)` - Check for equality.
+-   `angle(other)` - Returns angle between vectors.
+-   `counterclockwiseAngle(other)` - Return angle between vectors,
+    using the current vector as reference (can be negative).
+
+Functions:
+
+-   `dot(a, b)` - Dot product.
+-   `cross(a, b)` - Cross product.
+
+`Edge`
+
+Properties:
+
+-   `p1` - First edge point.
+-   `p2` - Last edge point.
+
+Methods:
+
+-   `Edge(points)` - Construct edge object (like a string between 2 points).
+-   `length()` - Edge length.
+-   `direction()` - Vector from `p1` to `p2`.
+-   `onEdge(ppoint)` - Whether `point` is on the edge.
+-   `parallel(otherEdge)` - Whether the two edges are parallel (but might not be on the same line).
+-   `collinear(otherEdge)` - Whether the two edges are collinear (parallel and on same line but might not overlap).
+-   `overlap(otherEdge)` - Returns overlap between two edges, or null if they do not overlap (might be a null-length edge).
+-   `equals(otherEdge)` - Whether the two edges are the same (have the same endpoints, even if reversed).
+
+`Polygon`
+
+Properties:
+
+-   `points` - Polygon points.
+-   `bounds` - Bounding box array: `[minx, miny, maxx, maxy]`.
+
+Methods:
+
+-   `Polygon(points)` - Construct polygon object.
+-   `boundsSize()` - Bounding box array: `[x, y, width, height]`.
+-   `edges()` - Edges of the polygon.
+-   `centroid()` - Polygon centroid.
+-   `centroidDistance(otherPoly)` - Distance from this polygon's centroid to `otherPoly`'s.
+-   `contains(point)` - Whether `point` is contained in the polygon.
+-   `onEdge(point)` - Whether `point` is on an edge.
+-   `touches(edge)` - Whether `edge` touches but doesn't intersect the polygon.
+
+`NavMesh`
+
+Properties:
+
+-   `polygons` - Triangulated mesh polygons (triangles).
+
+Methods:
+
+-   `NavMesh(polygons, costFunc = null, heuristicFunc = null)` - Construct navigation mesh.
+-   `findPath(from, to)` - Find path from `from` point to `to` point. Returns a list of points, or null if not found.
 
 ## Changelog
 

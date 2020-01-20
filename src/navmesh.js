@@ -2,6 +2,7 @@ import { uuid } from "uuidv4";
 import inside from "point-in-polygon";
 import earcut from "earcut";
 import QuadTree from "simple-quadtree";
+import TinyQueue from "tinyqueue";
 
 import { Vector, isclose, cross, dot } from "./math";
 
@@ -82,10 +83,7 @@ export class Edge {
         }
 
         if (!endpoints.length) {
-            endpoints = [
-                [0, 0],
-                [0, 0],
-            ];
+            return null;
         } else if (endpoints.length == 1) {
             endpoints = [endpoints[0], endpoints[0]];
         }
@@ -185,12 +183,14 @@ export class Polygon {
 }
 
 export class NavMesh {
-    constructor(polygons) {
+    constructor(polygons, costFunc = null, heuristicFunc = null) {
         this._uuid = uuid();
         this.polygons = this._triangulate(polygons).map(
             points => new Polygon(points)
         );
-        this.edges = {};
+        this.costFunc = costFunc;
+        this.heuristicFunc = heuristicFunc;
+
         this._buildQuadtree();
         this._buildNeighbors();
     }
@@ -266,13 +266,10 @@ export class NavMesh {
     }
 
     findPath(from, to) {
-        // console.log("---");
         from = _normalizePoint(from);
         to = _normalizePoint(to);
 
-        // const s = Date.now();
         const path = this._findPath(from, to);
-        // console.log("find", Date.now() - s);
         return path && this._funnel(from, to, path);
     }
 
@@ -283,30 +280,59 @@ export class NavMesh {
 
         if (fromPoly === null || toPoly === null) return null;
 
-        const frontier = [fromPoly];
+        const frontier = new TinyQueue(
+            [{ cost: 0, polygon: fromPoly }],
+            (a, b) => a.cost - b.cost
+        );
         const cameFrom = { [fromPoly._uuid]: null };
-        // const cost = { [fromPoly._uuid]: 0 };
-        // const s = Date.now();
+        const cost = { [fromPoly._uuid]: 0 };
 
         while (frontier.length) {
-            const current = frontier.pop();
+            const current = frontier.pop().polygon;
 
             if (current._uuid === toPoly._uuid) {
                 break;
             }
 
-            for (const next of Object.values(current.neighbors)) {
-                // const nextCost = cost[current._uuid];
+            for (const { polygon: next } of Object.values(current.neighbors)) {
+                const nextCost =
+                    cost[current._uuid] + this._computeCost(current, next);
 
-                if (!cameFrom.hasOwnProperty(next.polygon._uuid)) {
-                    frontier.push(next.polygon);
-                    cameFrom[next.polygon._uuid] = current;
+                if (
+                    // node not yet visited
+                    !cost.hasOwnProperty(next._uuid) ||
+                    // this path to node has lower cost
+                    nextCost < cost[next._uuid]
+                ) {
+                    frontier.push({
+                        cost: nextCost + this._heuristic(next, toPoly),
+                        polygon: next,
+                    });
+                    cost[next._uuid] = nextCost;
+                    cameFrom[next._uuid] = current;
                 }
             }
         }
-        // console.log("after", Date.now() - s, Object.keys(cameFrom).length);
 
         return this._reconstructPath(toPoly, cameFrom);
+    }
+
+    _computeDistance(a, b) {
+        return a.centroidDistance(b);
+    }
+
+    _computeCost(a, b) {
+        if (this.costFunc !== null) {
+            const portal = a.neighbors[b._uuid].portal;
+            return this.costFunc(a, b, portal);
+        }
+        return this._computeDistance(a, b);
+    }
+
+    _heuristic(poly, to) {
+        if (poly._uuid == to._uuid) return 0;
+        if (this.heuristicFunc !== null) return this.heuristicFunc(poly, to);
+        return this._computeDistance(poly, to);
     }
 
     _findContainingPolygon(point) {
