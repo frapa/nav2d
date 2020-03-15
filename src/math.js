@@ -46,7 +46,9 @@ export class Vector {
     }
 
     angle(other) {
-        return Math.acos(dot(this, other) / (this.length() * other.length()));
+        return Math.acos(
+            clip(-1, 1, dot(this, other) / (this.length() * other.length()))
+        );
     }
 
     counterclockwiseAngle(other) {
@@ -69,4 +71,10 @@ export function cross(a, b) {
 
 export function isclose(a, b, eps = EPS) {
     return a > b - eps && a < b + eps;
+}
+
+export function clip(a, b, v) {
+    if (v < a) return a;
+    if (v > b) return b;
+    return v;
 }

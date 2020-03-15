@@ -5,6 +5,7 @@ import {
     Edge,
     Polygon,
     isclose,
+    clip,
     dot,
     cross,
     NavMesh,
@@ -86,6 +87,12 @@ test("dot", t => {
 test("cross", t => {
     const prod = cross(vector(), vector());
     t.true(isclose(prod, 0));
+});
+
+test("clip", t => {
+    t.equals(clip(2, 3, 2.5), 2.5);
+    t.equals(clip(2, 3, 4), 3);
+    t.equals(clip(2, 3, 1), 2);
 });
 
 test("vector_error", t => {
@@ -391,6 +398,36 @@ test("navmesh_find_path", t => {
         const path = mesh.findPath(from, to);
         t.deepEqual(path, expected);
     }
+});
+
+test("navmesh_find_path_angle_acos_outside_range", t => {
+    const navmesh = new NavMesh([
+        [
+            [105, 245],
+            [105, 755],
+            [245, 105],
+        ],
+        [
+            [105, 755],
+            [245, 895],
+            [245, 105],
+        ],
+        [
+            [245, 895],
+            [755, 105],
+            [245, 105],
+        ],
+    ]);
+
+    const path = navmesh.findPath(
+        [321.94381764911583, 311.00705914346884],
+        [145.50164006384801, 335.0348767805669]
+    );
+
+    t.deepEqual(path, [
+        new Vector(321.94381764911583, 311.00705914346884),
+        new Vector(145.50164006384801, 335.0348767805669),
+    ]);
 });
 
 test("navmesh_performance", t => {

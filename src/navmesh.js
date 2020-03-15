@@ -391,8 +391,6 @@ export class NavMesh {
                 newEdge1 = this._funnelEdge(edge1, edge2, newEdge1);
                 newEdge2 = this._funnelEdge(edge2, edge1, newEdge2);
 
-                // If the old edges are not set, than we are at the start of the algorithm,
-                // and we need to set the
                 if (newEdge1 === null || newEdge2 === null) {
                     const edge = newEdge1 === null ? edge2 : edge1;
                     const newPath = this._splitAt(

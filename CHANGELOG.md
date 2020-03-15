@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+-   New function `clip(a, b, v)` that clips the value of `v` between `a` and `b`.
+-   Bugfix: certain floating-point values caused the `angle` function among
+    two vectors to return `NaN` due to the arccos function.
+-   Updated documentation.
+
 ## 1.0.0
 
 -   Implemented high-performance A\* instead of breadth first search.

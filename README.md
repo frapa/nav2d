@@ -159,6 +159,9 @@ Functions:
 
 -   `dot(a, b)` - Dot product.
 -   `cross(a, b)` - Cross product.
+-   `isclose(a, b)` - Return true if the given floats are close to each other.
+-   `clip(a, b, v)` - Return true if `v` is in the range `a`, `b` range,
+    the closest limit of the range otherwise.
 
 `Edge`
 
