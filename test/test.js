@@ -90,9 +90,9 @@ test("cross", t => {
 });
 
 test("clip", t => {
-    t.equals(clip(2, 3, 2.5), 2.5);
-    t.equals(clip(2, 3, 4), 3);
-    t.equals(clip(2, 3, 1), 2);
+    t.assert(clip(2, 3, 2.5) == 2.5);
+    t.assert(clip(2, 3, 4) == 3);
+    t.assert(clip(2, 3, 1) == 2);
 });
 
 test("vector_error", t => {
@@ -400,7 +400,7 @@ test("navmesh_find_path", t => {
     }
 });
 
-test("navmesh_find_path_angle_acos_outside_range", t => {
+test("navmesh_find_path_angle_acos_outside_ra", t => {
     const navmesh = new NavMesh([
         [
             [105, 245],
