@@ -133,7 +133,7 @@ This is basically it. This package does nothing more and nothing less.
 
 ## API Reference
 
-`Point` or `Vector` (aliases)
+#### `Point` or `Vector` (aliases)
 
 > **Note:** In all places where points are accepted, `nav2d` also accepts
 > arrays `[x, y]` or `{ x: x, y: y }` objects.
@@ -164,7 +164,7 @@ Functions:
 -   `clip(a, b, v)` - Return true if `v` is in the range `a`, `b` range,
     the closest limit of the range otherwise.
 
-`Edge`
+#### `Edge`
 
 Properties:
 
@@ -182,7 +182,7 @@ Methods:
 -   `overlap(otherEdge)` - Returns overlap between two edges, or null if they do not overlap (might be a null-length edge).
 -   `equals(otherEdge)` - Whether the two edges are the same (have the same endpoints, even if reversed).
 
-`Polygon`
+#### `Polygon`
 
 Properties:
 
@@ -200,7 +200,7 @@ Methods:
 -   `onEdge(point)` - Whether `point` is on an edge.
 -   `touches(edge)` - Whether `edge` touches but doesn't intersect the polygon.
 
-`NavMesh`
+#### `NavMesh`
 
 Properties:
 
