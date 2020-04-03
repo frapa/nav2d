@@ -3,8 +3,8 @@
   "version": "1.1.1",
   "description": "2d navigation meshes with pathfinding and funneling",
   "repository": "https://github.com/frapa/nav2d",
-  "main": "dist/nav2d.bundle.js",
-  "unpkg": "dist/nav2d.bundle.js",
+  "main": "dist/nav2d.min.js",
+  "unpkg": "dist/nav2d.min.js",
   "module": "src/nav2d.js",
   "keywords": [
     "navigation mesh",
@@ -21,7 +21,7 @@
     "AI"
   ],
   "scripts": {
-    "build": "webpack -p",
+    "build": "webpack && webpack --config webpack_deps.config.js",
     "prepublish": "npm test && npm run build",
     "test": "npm run lint && nyc ava --verbose",
     "lint": "eslint src",

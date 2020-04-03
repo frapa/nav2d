@@ -5,7 +5,7 @@ module.exports = {
     entry: "./src/nav2d.js",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "nav2d.bundle.js",
+        filename: "nav2d.min.js",
         library: "nav2d",
         libraryTarget: "umd",
         globalObject: `(typeof self !== 'undefined' ? self : this)`,
