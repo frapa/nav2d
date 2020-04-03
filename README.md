@@ -1,5 +1,6 @@
 # Nav2d
 
+[![npm version](https://badge.fury.io/js/nav2d.svg)](https://badge.fury.io/js/nav2d)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![minzipped size](https://badgen.net/bundlephobia/minzip/nav2d)](https://bundlephobia.com/result?p=nav2d)
 ![Tests](https://github.com/frapa/nav2d/workflows/Tests/badge.svg)
