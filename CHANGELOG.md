@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+-   Fixed bug causing the path to be wrong in some situations.
+
 ## 1.1.0
 
 -   New function `clip(a, b, v)` that clips the value of `v` between `a` and `b`.

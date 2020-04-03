@@ -464,10 +464,10 @@ test("navmesh_performance", (t) => {
     const path3 = mesh.findPath([1, 1], [299, 299]);
     const elapsed4 = Date.now() - start4;
 
-    t.assert(elapsed1 < 2000);
-    t.assert(elapsed2 < 20);
-    t.assert(elapsed3 < 10);
-    t.assert(elapsed4 < 50);
+    t.assert(elapsed1 < 2500);
+    t.assert(elapsed2 < 25);
+    t.assert(elapsed3 < 15);
+    t.assert(elapsed4 < 60);
 
     console.log(elapsed1, elapsed2, elapsed3, elapsed4);
 });
