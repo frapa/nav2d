@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+-   Added minified bundles to the package, so that the package can be included from unpkg
+    directly. Also added bundles including all dependencies (marked with `_deps` in the name),
+    so that it is possible to include the package and all dependencies with one script tag from
+    the CDN.
+
 ## 1.1.1
 
 -   Fixed bug causing the path to be wrong in some situations.

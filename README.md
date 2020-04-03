@@ -9,7 +9,7 @@
 This is a high-quality implementation of a 2D polygonal navigation mesh with A\* path finding
 and funneling (e.g. finding not only the mesh nodes but also the actual path across polygons).
 
-![Path finding examples](docs/images/paths.png)
+![Path finding examples](docs/images/tower_defence.png)
 
 Image: different paths on simple mesh (top) and another path in an automatically triangulated
 mesh (bottom).
@@ -36,6 +36,32 @@ This package aims to:
     -   All geometric operations and comparisons are tolerant to floating point errors.
     -   Support disconnected navigation meshes.
 -   Have good test coverage.
+
+## Install
+
+There are multiple ways to install `nav2d`. If you are using npm,
+and building your game with wepback, you can install and use the package
+directly:
+
+```bash
+$ npm i nav2d
+```
+
+You can also directly include the library from the unpkg CDN into your page.
+There are two options here,
+
+1. You can use the version containing only the code of this library (you'll have to include all dependencies yourself):
+
+    ```html
+    <script defer src="https://unpkg.com/nav2d/dist/nav2d.min.js"></script>
+    ```
+
+2. You can use the `deps` bundle, which ships together with all dependencies,
+   for hassle free experience:
+
+    ```html
+    <script defer src="https://unpkg.com/nav2d/dist/nav2d_deps.min.js"></script>
+    ```
 
 ## How to use
 
