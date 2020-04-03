@@ -73,64 +73,64 @@ function big_navmesh() {
     return new NavMesh(poly_points);
 }
 
-test("isclose", t => {
+test("isclose", (t) => {
     t.true(isclose(5.456, 5.45600000001));
     t.true(isclose(-0, 0));
     t.false(isclose(5.456, 5.4561));
 });
 
-test("dot", t => {
+test("dot", (t) => {
     const prod = dot(vector(), vector());
     t.true(isclose(prod, 25 + 36));
 });
 
-test("cross", t => {
+test("cross", (t) => {
     const prod = cross(vector(), vector());
     t.true(isclose(prod, 0));
 });
 
-test("clip", t => {
+test("clip", (t) => {
     t.assert(clip(2, 3, 2.5) == 2.5);
     t.assert(clip(2, 3, 4) == 3);
     t.assert(clip(2, 3, 1) == 2);
 });
 
-test("vector_error", t => {
+test("vector_error", (t) => {
     t.throws(() => {
         new Vector("a", null);
     });
 });
 
-test("vector_sum", t => {
+test("vector_sum", (t) => {
     t.deepEqual(vector().add(vector()), new Vector(10, 12));
     t.deepEqual(vector().add(4), new Vector(9, 10));
 });
 
-test("vector_sub", t => {
+test("vector_sub", (t) => {
     t.deepEqual(vector().sub(vector()), new Vector(0, 0));
     t.deepEqual(vector().sub(4), new Vector(1, 2));
 });
 
-test("vector_mul", t => {
+test("vector_mul", (t) => {
     t.deepEqual(vector().mul(vector()), new Vector(25, 36));
     t.deepEqual(vector().mul(4), new Vector(20, 24));
 });
 
-test("vector_div", t => {
+test("vector_div", (t) => {
     t.deepEqual(vector().div(vector()), new Vector(1, 1));
     t.deepEqual(vector().div(2), new Vector(2.5, 3));
 });
 
-test("vector_length", t => {
+test("vector_length", (t) => {
     t.assert(isclose(vector().length(), Math.sqrt(25 + 36)));
 });
 
-test("vector_equals", t => {
+test("vector_equals", (t) => {
     t.true(vector().equals(vector()));
     t.false(vector().equals(new Vector(100, 100)));
 });
 
-test("vector_angle", t => {
+test("vector_angle", (t) => {
     t.assert(isclose(new Vector(1, 0).angle(new Vector(0, 1)), Math.PI / 2));
     t.assert(isclose(new Vector(1, 0).angle(new Vector(-1, 0)), Math.PI));
     t.assert(isclose(new Vector(1, 0).angle(new Vector(1, 1)), Math.PI / 4));
@@ -138,7 +138,7 @@ test("vector_angle", t => {
     t.assert(isclose(new Vector(0, -1).angle(new Vector(1, 0)), Math.PI / 2));
 });
 
-test("vector_counterclockwise_angle", t => {
+test("vector_counterclockwise_angle", (t) => {
     t.assert(
         isclose(
             new Vector(1, 0).counterclockwiseAngle(new Vector(0, 1)),
@@ -171,54 +171,50 @@ test("vector_counterclockwise_angle", t => {
     );
 });
 
-test("vector_to_string", t => {
+test("vector_to_string", (t) => {
     t.true(vector() == "{ x: 5, y: 6 }");
 });
 
-test("edge_length", t => {
+test("edge_length", (t) => {
     t.assert(edge().length() == 5);
 });
 
-test("edge_on_edge", t => {
+test("edge_on_edge", (t) => {
     t.true(edge().onEdge([1.5, 2]));
     t.true(new Edge([0, 0], [0, 2]).onEdge([0.000000001, 1]));
     t.false(edge().onEdge([1, 2]));
     t.false(edge().onEdge([6, 8]));
 });
 
-test("edge_parallel", t => {
+test("edge_parallel", (t) => {
     t.true(edge().parallel(edge()));
     t.true(edge().parallel(new Edge([0, 0], [-3, -4])));
     t.true(edge().parallel(new Edge([1, 0], [4, 4])));
     t.false(edge().parallel(new Edge([0, 0], [1, 0])));
 });
 
-test("edge_collinear", t => {
+test("edge_collinear", (t) => {
     t.true(edge().collinear(edge()));
     t.true(edge().collinear(new Edge([0, 0], [-3, -4])));
     t.false(edge().collinear(new Edge([1, 0], [4, 4])));
     t.false(edge().collinear(new Edge([0, 0], [1, 0])));
 });
 
-test("edge_overlap", t => {
+test("edge_overlap", (t) => {
     t.true(
         edge()
             .overlap(new Edge([1.5, 2], [6, 8]))
             .equals(new Edge([1.5, 2], [3, 4]))
     );
 
-    t.true(
-        edge()
-            .overlap(edge())
-            .equals(edge())
-    );
+    t.true(edge().overlap(edge()).equals(edge()));
 
     t.true(edge().overlap(new Edge([-6, -8], [-3, -4])) == null);
 
     t.throws(() => edge().overlap(new Edge([0, 0], [1, 0])));
 });
 
-test("construct_polygon_from_array", t => {
+test("construct_polygon_from_array", (t) => {
     new Polygon([
         [0, 0],
         [0, 12],
@@ -227,7 +223,7 @@ test("construct_polygon_from_array", t => {
     t.pass();
 });
 
-test("construct_polygon_from_object", t => {
+test("construct_polygon_from_object", (t) => {
     new Polygon([
         { x: 0, y: 0 },
         { x: 0, y: 12 },
@@ -236,16 +232,16 @@ test("construct_polygon_from_object", t => {
     t.pass();
 });
 
-test("construct_polygon_from_vector", t => {
+test("construct_polygon_from_vector", (t) => {
     new Polygon([new Vector(0, 0), new Vector(0, 12), new Vector(12, 0)]);
     t.pass();
 });
 
-test("polygon_bounds", t => {
+test("polygon_bounds", (t) => {
     t.deepEqual(polygon().bounds, [0, 0, 12, 12]);
 });
 
-test("polygon_bounds_size", t => {
+test("polygon_bounds_size", (t) => {
     t.deepEqual(
         new Polygon([
             [10, 10],
@@ -256,10 +252,10 @@ test("polygon_bounds_size", t => {
     );
 });
 
-test("polygon_edges", t => {
+test("polygon_edges", (t) => {
     const edges = polygon().edges();
     t.deepEqual(
-        edges.map(e => [e.p1, e.p2]),
+        edges.map((e) => [e.p1, e.p2]),
         [
             [new Vector(12, 0), new Vector(0, 0)],
             [new Vector(0, 0), new Vector(0, 12)],
@@ -268,12 +264,12 @@ test("polygon_edges", t => {
     );
 });
 
-test("polygon_centroid", t => {
+test("polygon_centroid", (t) => {
     const centroid = polygon().centroid();
     t.deepEqual(centroid, new Vector(4, 4));
 });
 
-test("polygon_centroid_distance", t => {
+test("polygon_centroid_distance", (t) => {
     t.true(isclose(polygon().centroidDistance(polygon()), 0));
 
     const poly1 = new Polygon([
@@ -292,13 +288,13 @@ test("polygon_centroid_distance", t => {
     t.true(isclose(poly1.centroidDistance(poly2), 25));
 });
 
-test("polygon_on_edge", t => {
+test("polygon_on_edge", (t) => {
     t.truthy(polygon().onEdge([6, 6]));
     t.falsy(polygon().onEdge([7, 7]));
     t.falsy(polygon().onEdge([3, 3]));
 });
 
-test("polygon_contains", t => {
+test("polygon_contains", (t) => {
     t.true(polygon().contains([0, 0]));
     t.true(polygon().contains([1, 0]));
     t.true(polygon().contains([1, 1]));
@@ -317,7 +313,7 @@ test("polygon_contains", t => {
     t.false(polygon().contains([0, 12.001]));
 });
 
-test("navmesh_touch_only_one_point", t => {
+test("navmesh_touch_only_one_point", (t) => {
     // If the mash has polygon touching only in one point,
     // the case should be handled correcly, and not throw an error
     const mesh = new NavMesh([
@@ -355,7 +351,7 @@ test("navmesh_touch_only_one_point", t => {
     t.pass();
 });
 
-test("navmesh_neighbours", t => {
+test("navmesh_neighbours", (t) => {
     const mesh = navmesh();
     const [poly1, poly2, poly3, poly4] = mesh.polygons;
     t.assert(Object.values(poly1.neighbors).length == 1);
@@ -371,7 +367,7 @@ test("navmesh_neighbours", t => {
     t.assert(Object.values(poly4.neighbors).length == 0);
 });
 
-test("navmesh_find_path", t => {
+test("navmesh_find_path", (t) => {
     const mesh = navmesh();
 
     const tests = [
@@ -400,7 +396,7 @@ test("navmesh_find_path", t => {
     }
 });
 
-test("navmesh_find_path_angle_acos_outside_ra", t => {
+test("navmesh_find_path_angle_acos_outside_range", (t) => {
     const navmesh = new NavMesh([
         [
             [105, 245],
@@ -430,7 +426,28 @@ test("navmesh_find_path_angle_acos_outside_ra", t => {
     ]);
 });
 
-test("navmesh_performance", t => {
+test("navmesh_find_path_bug2", (t) => {
+    const navmesh = new NavMesh(require("./tower_defense.json"));
+
+    const path = navmesh.findPath([30, 1000], [970, 0]);
+
+    t.deepEqual(path, [
+        new Vector(30, 1000),
+        new Vector(74.9090909090909, 893.0909090909091),
+        new Vector(925.0909090909091, 834.1818181818181),
+        new Vector(925.0909090909091, 711.2727272727273),
+        new Vector(74.9090909090909, 652.3636363636364),
+        new Vector(74.9090909090909, 529.4545454545455),
+        new Vector(925.0909090909091, 470.54545454545456),
+        new Vector(925.0909090909091, 347.6363636363636),
+        new Vector(74.9090909090909, 288.72727272727275),
+        new Vector(74.9090909090909, 165.8181818181818),
+        new Vector(925.0909090909091, 106.9090909090909),
+        new Vector(970, 0),
+    ]);
+});
+
+test("navmesh_performance", (t) => {
     const start1 = Date.now();
     const mesh = big_navmesh();
     const elapsed1 = Date.now() - start1;
@@ -455,7 +472,7 @@ test("navmesh_performance", t => {
     console.log(elapsed1, elapsed2, elapsed3, elapsed4);
 });
 
-test("navmesh_heuristic", t => {
+test("navmesh_heuristic", (t) => {
     let count = 0;
     const mesh = navmesh(null, (poly, to) => {
         t.true(poly instanceof Polygon);
@@ -470,7 +487,7 @@ test("navmesh_heuristic", t => {
     t.true(count == 1);
 });
 
-test("navmesh_cost", t => {
+test("navmesh_cost", (t) => {
     let count = 0;
     const mesh = navmesh((a, b, portal) => {
         t.true(a instanceof Polygon);

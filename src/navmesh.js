@@ -78,7 +78,7 @@ export class Edge {
         // which is fine as it yields a zero-length edge
         if (endpoints.length > 2) {
             endpoints = endpoints.filter(
-                (p, i) => endpoints.findIndex(op => op.equals(p)) === i
+                (p, i) => endpoints.findIndex((op) => op.equals(p)) === i
             );
         }
 
@@ -186,7 +186,7 @@ export class NavMesh {
     constructor(polygons, costFunc = null, heuristicFunc = null) {
         this._uuid = uuid();
         this.polygons = this._triangulate(polygons).map(
-            points => new Polygon(points)
+            (points) => new Polygon(points)
         );
         this.costFunc = costFunc;
         this.heuristicFunc = heuristicFunc;
@@ -201,7 +201,7 @@ export class NavMesh {
             const trianglesIndices = earcut(this._flatten(poly));
             for (let i = 0; i < trianglesIndices.length / 3; i++) {
                 const indices = trianglesIndices.slice(i * 3, i * 3 + 3);
-                triangles.push(indices.map(j => poly[j]));
+                triangles.push(indices.map((j) => poly[j]));
             }
         }
         return triangles;
@@ -234,7 +234,7 @@ export class NavMesh {
     }
 
     _buildNeighbors() {
-        this.polygons.forEach(polygon => (polygon.neighbors = {}));
+        this.polygons.forEach((polygon) => (polygon.neighbors = {}));
 
         for (let i = 0; i < this.polygons.length; i++) {
             const poly1 = this.polygons[i];
@@ -397,7 +397,7 @@ export class NavMesh {
                         // We only need to check the polygon up to now, not the future
                         // ones. This can have serious performance implications,
                         // as the function is recursive.
-                        path.slice(0, i + 1),
+                        path.slice(i - 1),
                         edge.p2
                     );
                     points.push(...this._funnel(edge.p2, to, newPath));
@@ -442,7 +442,8 @@ export class NavMesh {
 
     _splitAt(path, point) {
         const newStartIndex = path.indexOf(
-            path.reverse().find(p => p.contains(point))
+            // Reverse changes the array in-place
+            [...path].reverse().find((p) => p.contains(point))
         );
         return path.slice(newStartIndex);
     }

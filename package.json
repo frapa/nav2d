@@ -21,7 +21,7 @@
     "AI"
   ],
   "scripts": {
-    "build": "webpack",
+    "build": "webpack -p",
     "prepublish": "npm test && npm run build",
     "test": "npm run lint && nyc ava --verbose",
     "lint": "eslint src",
@@ -43,6 +43,7 @@
   "dependencies": {
     "earcut": "^2.2.2",
     "point-in-polygon": "^1.0.1",
+    "prettier": "^2.0.2",
     "simple-quadtree": "^0.1.3",
     "tinyqueue": "^2.0.3",
     "uuidv4": "^6.0.6"
