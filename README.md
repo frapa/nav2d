@@ -169,11 +169,11 @@ comes with a simple mesh viewer and editor, where you can also test the path fin
 The editor lets you load, visualize and edit navigation meshes and then export the result.
 It also comes with built-in path finding, so that you can test your routes.
 
-![Editor screenshot](./docs/images/editor_path.png)
+![Editor path finding](./docs/images/editor_path.png)
 
 To help while editing, a powerful snapping feature is also included.
 
-![Editor screenshot](./docs/images/editor_snap_.png)
+![Editor snap feature](./docs/images/editor_snap.png)
 
 ## API Reference
 
