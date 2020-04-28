@@ -157,6 +157,24 @@ and returns an estimation of the distance between the two. Both of these are `Po
 
 This is basically it. This package does nothing more and nothing less.
 
+## The Editor
+
+For those looking for an easy way to create, view and edit their navigation meshes, `nav2d`
+comes with a simple mesh viewer and editor, where you can also test the path finding.
+
+[The editor is accessible here](https://frapa.github.io/nav2d/editor/index.html)
+
+![Editor screenshot](./docs/images/editor.png)
+
+The editor lets you load, visualize and edit navigation meshes and then export the result.
+It also comes with built-in path finding, so that you can test your routes.
+
+![Editor screenshot](./docs/images/editor_path.png)
+
+To help while editing, a powerful snapping feature is also included.
+
+![Editor screenshot](./docs/images/editor_snap_.png)
+
 ## API Reference
 
 #### `Point` or `Vector` (aliases)

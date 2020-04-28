@@ -1,0 +1,74 @@
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+aside {
+    position: fixed;
+    z-index: 1;
+    width: calc(360px - 2rem);
+    margin: 2rem;
+}
+
+main {
+    height: 100%;
+}
+
+nav {
+    box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.5),
+        0 0 0 1px rgba(10, 10, 10, 0.1) !important;
+}
+
+.compact {
+    padding: 0.5rem 0;
+}
+
+.grow {
+    flex-grow: 1;
+}
+
+#status b {
+    white-space: pre;
+    margin: 0 0.5rem 0 0.25rem;
+}
+
+.node {
+    fill: hsl(204, 86%, 53%);
+    stroke: hsl(0, 0%, 29%);
+}
+
+.node:hover {
+    fill: hsl(171, 100%, 41%);
+}
+
+.triangle {
+    fill: hsl(0, 0%, 96%);
+    stroke: hsl(0, 0%, 71%);
+}
+
+.triangle:hover {
+    fill: hsl(0, 0%, 86%);
+}
+
+.field.is-grouped > .control {
+    flex-shrink: 1 !important;
+}
+
+.path {
+    stroke-width: 2;
+    stroke: hsl(204, 86%, 53%);
+}
+
+.portal {
+    stroke-width: 2;
+}
+
+.new-poly {
+    stroke: black;
+}
+
+.snapping {
+    stroke-width: 2;
+    stroke: hsl(171, 100%, 41%);
+}

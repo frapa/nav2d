@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Mesh Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script defer src="https://unpkg.com/raphael@2.3.0/raphael.min.js"></script>
+    <script defer src="https://craig.global.ssl.fastly.net/js/mousetrap/mousetrap.min.js?a4098"></script>
+    <script defer src="../dist/nav2d_deps.min.js"></script>
+    <script defer src="./editor.js"></script>
+</head>
+
+<body onload="init()">
+
+    <input class="file-input" type="file" id="file" onchange="load_mesh()" accept=".json">
+
+    <aside>
+        <nav class="panel is-link has-background-white">
+            <h1 class="panel-heading">
+                Navigation Mesh Editor
+            </h1>
+            <div class="panel-block" style="display: block;">
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <div class="buttons has-addons">
+                                <button class="button" onclick="document.getElementById('file').click()" title="Open">
+                                    <span class="icon">
+                                        <i class="fas fa-folder-open"></i>
+                                    </span>
+                                </button>
+                                <button class="button" onclick="download_polygons()"" title=" Save">
+                                    <span class="icon">
+                                        <i class="fas fa-save"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="level-item">
+                            <div class="buttons has-addons">
+                                <button class="button" onclick="undo()" title="Undo">
+                                    <span class="icon">
+                                        <i class="fas fa-undo"></i>
+                                    </span>
+                                </button>
+                                <button class="button" onclick="redo()" title="Redo">
+                                    <span class="icon">
+                                        <i class="fas fa-redo"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="level-item">
+                            <div class="buttons has-addons">
+                                <button class="button" id="show-portals" onclick="
+                                        toggle_portals();
+                                        document.getElementById('show-portals').classList.toggle('is-link');
+                                    " title="Show portals">
+                                    <span class="icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="level-item">
+                            <div class="buttons has-addons">
+                                <button class="button"
+                                    onclick="document.getElementById('help').classList.toggle('is-active')"
+                                    title="Help">
+                                    <span class="icon">
+                                        <i class="fas fa-question-circle"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-block">
+                <div class="section compact grow">
+                    <form onsubmit="return compute_path();">
+
+                        <label class="label">From <span class="has-text-grey-light">(shift+click)</span></label>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <input class="input" type="number" placeholder="x" id="sx" required>
+                            </div>
+                            <div class="control">
+                                <input class="input" type="number" placeholder="y" id="sy" required>
+                            </div>
+                        </div>
+
+                        <label class="label">To <span class="has-text-grey-light">(shift+click)</span></label>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <input class="input" type="number" placeholder="x" id="ex" required>
+                            </div>
+                            <div class="control">
+                                <input class="input" type="number" placeholder="y" id="ey" required>
+                            </div>
+                        </div>
+
+                        <div class="level">
+                            <div class="level-left"></div>
+                            <div class="level-right">
+                                <input type="reset" class="button" style="margin-right: 1rem;" onclick="clear_path()"
+                                    value="Clear" />
+                                <button class="button is-link" onclick="compute_path()">Calculate</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="panel-block has-background-light is-size-7 is-family-monospace" id="stats">
+            </div>
+            <div class="panel-block has-background-light is-size-7 is-family-monospace" id="status">
+                &nbsp;
+            </div>
+        </nav>
+    </aside>
+
+    <main id="main" oncontextmenu="return false;">
+
+    </main>
+
+    <div class="modal" id="help">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h1 class="title">Help</h1>
+                <p style="margin-bottom: 1rem;">
+                    The <strong>Navigation Mesh Editor</strong> is a simple navmesh editor and viewer
+                    that can import and export the mesh as JSON. It can also run path finding
+                    between two points to debug the mesh.
+                </p>
+                <p style="margin-bottom: 1.5rem;">
+                    This editor was written for the <a href="https://github.com/frapa/nav2d">nav2d</a>
+                    javascript path finding library.
+                </p>
+
+                <h5 class="title is-5">General</h5>
+                <table class="table is-fullwidth">
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>ctrl + o</code>
+                        </td>
+                        <td>
+                            Open
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>ctrl + s</code>
+                        </td>
+                        <td>
+                            Save
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>h</code>
+                        </td>
+                        <td>
+                            Toggle this help
+                        </td>
+                    </tr>
+                </table>
+                <h5 class="title is-5">Navigation</h5>
+                <table class="table is-fullwidth">
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>mouse right + drag</code>
+                        </td>
+                        <td>
+                            Move around
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>mouse wheel</code>
+                        </td>
+                        <td>
+                            Zoom
+                        </td>
+                    </tr>
+                </table>
+                <h5 class="title is-5">Editing</h5>
+                <table class="table is-fullwidth">
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>mouse left</code>
+                        </td>
+                        <td>
+                            Add or edit points
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>ctrl + z</code>
+                        </td>
+                        <td>
+                            Undo
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>ctrl + y</code>
+                        </td>
+                        <td>
+                            Redo
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>ctrl + edit points</code>
+                        </td>
+                        <td>
+                            Snap point also to continuation of any edges.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">
+                            <code>shift + click</code>
+                        </td>
+                        <td>
+                            Set navigation start or end.
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close"
+            onclick="document.getElementById('help').classList.toggle('is-active')">
+
+        </button>
+    </div>
+
+</body>
+
+</html>
