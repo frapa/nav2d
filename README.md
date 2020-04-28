@@ -162,7 +162,7 @@ This is basically it. This package does nothing more and nothing less.
 For those looking for an easy way to create, view and edit their navigation meshes, `nav2d`
 comes with a simple mesh viewer and editor, where you can also test the path finding.
 
-[The editor is accessible here](https://frapa.github.io/nav2d/editor/index.html)
+[The editor is accessible here](https://frapa.github.io/nav2d/navmesh_editor/index.html)
 
 ![Editor screenshot](./docs/images/editor.png)
 
