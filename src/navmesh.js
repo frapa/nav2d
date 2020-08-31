@@ -1,4 +1,4 @@
-import { uuid } from "uuidv4";
+import { v4 as uuidv4 } from "uuid";
 import inside from "point-in-polygon";
 import earcut from "earcut";
 import QuadTree from "simple-quadtree";
@@ -18,7 +18,7 @@ function _normalizePoint(point) {
 
 export class Edge {
     constructor(p1, p2) {
-        this._uuid = uuid();
+        this._uuid = uuidv4();
         this.p1 = _normalizePoint(p1);
         this.p2 = _normalizePoint(p2);
     }
@@ -101,7 +101,7 @@ export class Edge {
 
 export class Polygon {
     constructor(points) {
-        this._uuid = uuid();
+        this._uuid = uuidv4();
         this.points = points.map(_normalizePoint);
         this.bounds = this._computeBounds();
     }
@@ -184,7 +184,7 @@ export class Polygon {
 
 export class NavMesh {
     constructor(polygons, costFunc = null, heuristicFunc = null) {
-        this._uuid = uuid();
+        this._uuid = uuidv4();
         this.polygons = this._triangulate(polygons).map(
             (points) => new Polygon(points)
         );

@@ -25,11 +25,11 @@ module.exports = {
         ],
     },
     externals: {
-        uuidv4: {
-            root: "uuidv4",
-            amd: "uuidv4",
-            commonjs2: "uuidv4",
-            commonjs: "uuidv4",
+        uuid: {
+            root: "uuid",
+            amd: "uuid",
+            commonjs2: "uuid",
+            commonjs: "uuid",
         },
         "point-in-polygon": {
             root: "point-in-polygon",
