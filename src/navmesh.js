@@ -336,12 +336,13 @@ export class NavMesh {
     }
 
     _findContainingPolygon(point) {
-        const halfSize = point.x * 0.01;
+        const halfXSize = point.x * 0.01;
+        const halfYSize = point.y * 0.01;
         const bounds = {
-            x: point.x * 0.99 - halfSize,
-            y: point.y * 0.99 - halfSize,
-            w: 2 * halfSize,
-            h: 2 * halfSize,
+            x: point.x - halfXSize,
+            y: point.y - halfYSize,
+            w: 2 * halfXSize,
+            h: 2 * halfYSize,
         };
         for (const poly of this.qt.get(bounds)) {
             if (poly.polygon.contains(point)) return poly.polygon;
