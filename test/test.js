@@ -464,7 +464,7 @@ test("navmesh_performance", (t) => {
     const path3 = mesh.findPath([1, 1], [299, 299]);
     const elapsed4 = Date.now() - start4;
 
-    t.assert(elapsed1 < 2500);
+    t.assert(elapsed1 < 3500);
     t.assert(elapsed2 < 25);
     t.assert(elapsed3 < 15);
     t.assert(elapsed4 < 60);
