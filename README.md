@@ -11,9 +11,6 @@ and funneling (e.g. finding not only the mesh nodes but also the actual path acr
 
 ![Path finding examples](docs/images/tower_defence.png)
 
-Image: different paths on simple mesh (top) and another path in an automatically triangulated
-mesh (bottom).
-
 ## Why this package
 
 This package was created due to the lack of generic 2D navigation mesh packages
