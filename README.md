@@ -249,6 +249,11 @@ Methods:
 Properties:
 
 -   `polygons` - Triangulated mesh polygons (triangles).
+-   `pointQuerySize` - Square edge size to use to query the `NavMes` quad tree
+    when checking for point to mesh intersection. This
+    should be much smaller than the average triangle size in
+    the mesh, and can freely be set according to your navigation mesh
+    scale. Defaults to 0.01.
 
 Methods:
 

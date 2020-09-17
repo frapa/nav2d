@@ -191,6 +191,12 @@ export class NavMesh {
         this.costFunc = costFunc;
         this.heuristicFunc = heuristicFunc;
 
+        // This will be used to check point collision with
+        // triangles. This should be much smaller that the typical
+        // size of your mesh triangles to avoid checking too many
+        // triangles for collision.
+        this.pointQuerySize = 0.01;
+
         this._buildQuadtree();
         this._buildNeighbors();
     }
@@ -336,12 +342,12 @@ export class NavMesh {
     }
 
     _findContainingPolygon(point) {
-        const halfSize = point.x * 0.01;
+        const halfQuerySize = this.pointQuerySize / 2;
         const bounds = {
-            x: point.x * 0.99 - halfSize,
-            y: point.y * 0.99 - halfSize,
-            w: 2 * halfSize,
-            h: 2 * halfSize,
+            x: point.x - halfQuerySize,
+            y: point.y - halfQuerySize,
+            w: this.pointQuerySize,
+            h: this.pointQuerySize,
         };
         for (const poly of this.qt.get(bounds)) {
             if (poly.polygon.contains(point)) return poly.polygon;

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1
+
+-   Fixed bug that would break path finding in certain cases when the path points where close
+    to the mesh edges. This was due to wrong querying of the underlying quad-tree.
+    A new `NavMesh.pointQuerySize` parameter was introduced to allow users to customize
+    query performance depending on the navigation mesh scale.
+-   Fixed deprecation warnings.
+
 ## 1.2.0
 
 -   Added minified bundles to the package, so that the package can be included from unpkg

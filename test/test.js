@@ -447,6 +447,14 @@ test("navmesh_find_path_bug2", (t) => {
     ]);
 });
 
+test("navmesh_find_path_bug3", (t) => {
+    const navmesh = new NavMesh(require("./point_quadtree_query.json"));
+
+    const path = navmesh.findPath([898, 1861], [898, 1862]);
+
+    t.deepEqual(path, [new Vector(898, 1861), new Vector(898, 1862)]);
+});
+
 test("navmesh_performance", (t) => {
     const start1 = Date.now();
     const mesh = big_navmesh();
