@@ -373,6 +373,7 @@ export class NavMesh {
         return path.reverse();
     }
 
+    /** Funnel algorithm, following https://medium.com/@reza.teshnizi/the-funnel-algorithm-explained-visually-41e374172d2d */
     _funnel(from, to, path) {
         if (path.length === 0) {
             throw new Error("Path cannot be empty.");
@@ -380,91 +381,105 @@ export class NavMesh {
             return [from, to];
         }
 
-        const points = [from];
-        let edge1 = null;
-        let edge2 = null;
+        const tail = [from];
+        const left = [];
+        const right = [];
 
-        for (let i = 0; i < path.length - 1; i++) {
+        // Initialize funnel
+        const initialPortal = path[0].neighbors[path[1]._uuid].portal;
+        const [initialLeft, initialRight] = this._orderLeftRight(from, initialPortal.p1, initialPortal.p2);
+        left.push(initialLeft);
+        right.push(initialRight);
+
+        // Iterate over portals
+        for (let i = 1; i < path.length - 2; i++) {
             const poly = path[i];
-            const next = path[i + 1];
-            const portal = poly.neighbors[next._uuid].portal;
+            const nextPoly = path[i + 1];
+            const portal = poly.neighbors[nextPoly._uuid].portal;
 
-            // Calculate portal edges
-            let [newEdge1, newEdge2] = this._pointPortalEdges(from, portal);
-
-            if (edge1 !== null && edge2 !== null) {
-                // Shrink funnel edges
-                newEdge1 = this._funnelEdge(edge1, edge2, newEdge1);
-                newEdge2 = this._funnelEdge(edge2, edge1, newEdge2);
-
-                if (newEdge1 === null || newEdge2 === null) {
-                    const edge = newEdge1 === null ? edge2 : edge1;
-                    const newPath = this._splitAt(
-                        // We only need to check the polygon up to now, not the future
-                        // ones. This can have serious performance implications,
-                        // as the function is recursive.
-                        path.slice(i - 1),
-                        edge.p2
-                    );
-                    points.push(...this._funnel(edge.p2, to, newPath));
-                    break;
-                }
+            // Determine whether funnel is extended on the left or right by the portal
+            const lastLeft = left.length === 0 ? tail[tail.length - 1] : left[left.length - 1];
+            const lastRight = right.length === 0 ? tail[tail.length - 1] : right[right.length - 1];
+            let extendLeft;
+            let newPoint;
+            if (portal.p1.equals(lastLeft)) {
+                extendLeft = false;
+                newPoint = portal.p2;
+            } else if (portal.p2.equals(lastLeft)) {
+                extendLeft = false;
+                newPoint = portal.p1;
+            } else if (portal.p1.equals(lastRight)) {
+                extendLeft = true;
+                newPoint = portal.p2;
+            } else if (portal.p2.equals(lastRight)) {
+                extendLeft = true;
+                newPoint = portal.p1;
+            } else {
+                throw new Error("Invalid portal: Funnel cannot be extended on both sides at once.");
             }
 
-            edge1 = newEdge1;
-            edge2 = newEdge2;
-
-            // If we are at the end of the path,
-            // just add the last edge, which is from -> to
-            if (i === path.length - 2) {
-                const toEdge = new Edge(from, to);
-                let newToEdge = this._funnelEdge(edge1, edge2, toEdge);
-                if (newToEdge === edge1) {
-                    points.push(edge1.p2);
-                } else if (newToEdge === null) {
-                    points.push(edge2.p2);
-                }
-
-                points.push(to);
-            }
+            // Extend funnel
+            this._extendFunnel(tail, left, right, extendLeft, newPoint);
         }
 
-        return points;
+        // Close funnel to endpoint
+        this._extendFunnel(tail, left, right, true, to);
+        this._extendFunnel(tail, left, right, false, to);
+
+        return tail;
     }
 
-    _pointPortalEdges(point, portal) {
-        const vec1 = portal.p1.sub(point);
-        const vec2 = portal.p2.sub(point);
-        // The funnel is between vec1 and vec2 in
-        // counterclockwise direction, so the ordering counts.
-        // and can be assessed with the sign of the
-        // cross product.
-        if (cross(vec1, vec2) < 0) {
-            return [new Edge(point, portal.p2), new Edge(point, portal.p1)];
+    _extendFunnel(tail, left, right, extendLeft, newPoint){
+        const apex = tail[tail.length - 1];
+        // We pretend to be in the `expandLeft` case here. Otherwise flip.
+        if (!extendLeft) {
+            [left, right] = [right, left];
+        }
+        // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
+        let j = 0;
+        while (j < left.length
+                && this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)) {
+            j++;
+        }
+        // All points in `left` with index `< j` are right of `newPoint` and
+        // all points in `left` with index `>= j` are left of or at the same angle as `newPoint`. 
+        left.length = j; // Shrink funnel if `j < left.length`
+        left.push(newPoint);
+        if (j === 0) {
+            // If the funnel shrunk all the way on the left, it might collapse to the right.
+            // Determine how far it needs to collapse
+            let k = 0;
+            while (k < right.length
+                    && !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)) {
+                k++;
+            }
+            // All points in `right` with index `< k` are left of or at the same angle as `newPoint` and
+            // all points in `right` with index `>= k` are right of `newPoint`. 
+            tail.push(...right.splice(0, k)); // Collapse funnel if `k > 0`
+        }
+    }
+
+    /** 
+     * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
+     * Checks for right-to-left order instead if `flip = true`.
+     * Returns `false` if the angles are equal.
+     */
+    _isInLeftRightOrder(origin, p1, p2, flip = false) {
+        if (flip) {
+            [p1, p2] = [p2, p1];
+        }
+        const vec1 = p1.sub(origin);
+        const vec2 = p2.sub(origin);
+        return cross(vec1, vec2) > 0;
+    }
+
+    /** Returns the points `p1` and `p2` in left-to-right order, viewed from `origin`. */
+    _orderLeftRight(origin, p1, p2) {
+        if (this._isInLeftRightOrder(origin, p1, p2)) {
+            return [p1, p2];
         } else {
-            return [new Edge(point, portal.p1), new Edge(point, portal.p2)];
+            return [p2, p1];
         }
     }
 
-    _splitAt(path, point) {
-        const newStartIndex = path.indexOf(
-            // Reverse changes the array in-place
-            [...path].reverse().find((p) => p.contains(point))
-        );
-        return path.slice(newStartIndex);
-    }
-
-    _funnelEdge(edge1, edge2, edge) {
-        const vec1 = edge1.direction();
-        const vec2 = edge2.direction();
-        const vector = edge.direction();
-        // If the cross product has different sign,
-        // the vector would enlarge the funnel
-        // -> return current vector as funnel edge.
-        if (cross(vec1, vec2) * cross(vec1, vector) < 0) return edge1;
-        // If the vector is inside the funnel, shrink funnel.
-        if (vec1.angle(vector) <= vec1.angle(vec2)) return edge;
-        // Vector would close the funnel, return null.
-        return null;
-    }
 }
