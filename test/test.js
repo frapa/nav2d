@@ -455,6 +455,14 @@ test("navmesh_find_path_bug3", (t) => {
     t.deepEqual(path, [new Vector(898, 1861), new Vector(898, 1862)]);
 });
 
+test("navmesh_find_path_bug4", (t) => {
+    const navmesh = new NavMesh(require("./boat.json"));
+
+    const path = navmesh.findPath([466, 167], [289, 175]);
+
+    t.deepEqual(path, [new Vector(466, 167), new Vector(443, 181), new Vector(323, 188), new Vector(289, 175)]);
+})
+
 test("navmesh_performance", (t) => {
     const start1 = Date.now();
     const mesh = big_navmesh();
