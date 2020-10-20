@@ -392,7 +392,7 @@ export class NavMesh {
         right.push(initialRight);
 
         // Iterate over portals
-        for (let i = 1; i < path.length - 2; i++) {
+        for (let i = 1; i < path.length - 1; i++) {
             const poly = path[i];
             const nextPoly = path[i + 1];
             const portal = poly.neighbors[nextPoly._uuid].portal;
