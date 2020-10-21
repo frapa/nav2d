@@ -253,8 +253,10 @@ export class NavMesh {
 
                 const portal = this._computePortal(poly1, poly2);
                 if (portal !== null && portal.length() > 0) {
-                    poly1.neighbors[poly2._uuid] = { polygon: poly2, portal };
-                    poly2.neighbors[poly1._uuid] = { polygon: poly1, portal };
+                    // Ensure that portal points are given in clockwise order, viewed from the centroid of the polygon
+                    let [p1, p2] = this._orderClockwise(poly1.centroid(), portal.p1, portal.p2);
+                    poly1.neighbors[poly2._uuid] = { polygon: poly2, portal: new Edge(p1, p2) };
+                    poly2.neighbors[poly1._uuid] = { polygon: poly1, portal: new Edge(p2, p1) };
                 }
             }
         }
@@ -387,39 +389,21 @@ export class NavMesh {
 
         // Initialize funnel
         const initialPortal = path[0].neighbors[path[1]._uuid].portal;
-        const [initialLeft, initialRight] = this._orderClockwise(from, initialPortal.p1, initialPortal.p2);
-        left.push(initialLeft);
-        right.push(initialRight);
+        left.push(initialPortal.p1);
+        right.push(initialPortal.p2);
 
         // Iterate over portals
         for (let i = 1; i < path.length - 1; i++) {
             const poly = path[i];
             const nextPoly = path[i + 1];
             const portal = poly.neighbors[nextPoly._uuid].portal;
+            // The portal end points are in clockwise order, viewed from the inside of the polygon.
 
-            // Determine whether funnel is extended on the left or right by the portal
-            const lastLeft = left.length === 0 ? tail[tail.length - 1] : left[left.length - 1];
-            const lastRight = right.length === 0 ? tail[tail.length - 1] : right[right.length - 1];
-            let extendLeft;
-            let newPoint;
-            if (portal.p1.equals(lastLeft)) {
-                extendLeft = false;
-                newPoint = portal.p2;
-            } else if (portal.p2.equals(lastLeft)) {
-                extendLeft = false;
-                newPoint = portal.p1;
-            } else if (portal.p1.equals(lastRight)) {
-                extendLeft = true;
-                newPoint = portal.p2;
-            } else if (portal.p2.equals(lastRight)) {
-                extendLeft = true;
-                newPoint = portal.p1;
-            } else {
-                throw new Error("Invalid portal: Funnel cannot be extended on both sides at once.");
-            }
+            // Extend funnel on the left
+            this._extendFunnel(tail, left, right, true, portal.p1);
 
-            // Extend funnel
-            this._extendFunnel(tail, left, right, extendLeft, newPoint);
+            // Extend funnel on the right
+            this._extendFunnel(tail, left, right, false, portal.p2);
         }
 
         // Close funnel to endpoint
@@ -435,6 +419,13 @@ export class NavMesh {
         if (!extendLeft) {
             [left, right] = [right, left];
         }
+
+        // If `newPoint` is the end point of the left side of the funnel, skip it.
+        const lastLeft = left.length === 0 ? tail[tail.length - 1] : left[left.length - 1];
+        if (newPoint.equals(lastLeft)) {
+            return;
+        }
+
         // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
         let j = 0;
         while (j < left.length
