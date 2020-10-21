@@ -387,7 +387,7 @@ export class NavMesh {
 
         // Initialize funnel
         const initialPortal = path[0].neighbors[path[1]._uuid].portal;
-        const [initialLeft, initialRight] = this._orderLeftRight(from, initialPortal.p1, initialPortal.p2);
+        const [initialLeft, initialRight] = this._orderClockwise(from, initialPortal.p1, initialPortal.p2);
         left.push(initialLeft);
         right.push(initialRight);
 
@@ -438,7 +438,7 @@ export class NavMesh {
         // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
         let j = 0;
         while (j < left.length
-                && this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)) {
+                && this._isInClockwiseOrder(apex, newPoint, left[j], !extendLeft)) {
             j++;
         }
         // All points in `left` with index `< j` are right of `newPoint` and
@@ -450,7 +450,7 @@ export class NavMesh {
             // Determine how far it needs to collapse
             let k = 0;
             while (k < right.length
-                    && !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)) {
+                    && !this._isInClockwiseOrder(apex, newPoint, right[k], !extendLeft)) {
                 k++;
             }
             // All points in `right` with index `< k` are left of or at the same angle as `newPoint` and
@@ -460,11 +460,11 @@ export class NavMesh {
     }
 
     /** 
-     * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
-     * Checks for right-to-left order instead if `flip = true`.
+     * Are the points `p1` and `p2` in clockwise order, viewed from `origin`?
+     * Checks for counter-clockwise order instead if `flip = true`.
      * Returns `false` if the angles are equal.
      */
-    _isInLeftRightOrder(origin, p1, p2, flip = false) {
+    _isInClockwiseOrder(origin, p1, p2, flip = false) {
         if (flip) {
             [p1, p2] = [p2, p1];
         }
@@ -473,9 +473,9 @@ export class NavMesh {
         return cross(vec1, vec2) > 0;
     }
 
-    /** Returns the points `p1` and `p2` in left-to-right order, viewed from `origin`. */
-    _orderLeftRight(origin, p1, p2) {
-        if (this._isInLeftRightOrder(origin, p1, p2)) {
+    /** Returns the points `p1` and `p2` in clockwise order, viewed from `origin`. */
+    _orderClockwise(origin, p1, p2) {
+        if (this._isInClockwiseOrder(origin, p1, p2)) {
             return [p1, p2];
         } else {
             return [p2, p1];
