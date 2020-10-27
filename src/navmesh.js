@@ -461,7 +461,7 @@ export class NavMesh {
         }
         const vec1 = p1.sub(origin);
         const vec2 = p2.sub(origin);
-        return cross(vec1, vec2) > 0;
+        return cross(vec1, vec2) < 0;
     }
 
     /** Returns the points `p1` and `p2` in left-to-right order, viewed from `origin`. */
