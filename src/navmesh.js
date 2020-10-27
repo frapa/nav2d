@@ -254,9 +254,19 @@ export class NavMesh {
                 const portal = this._computePortal(poly1, poly2);
                 if (portal !== null && portal.length() > 0) {
                     // Ensure that portal points are given in left-to-right order, viewed from the centroid of the polygon
-                    let [p1, p2] = this._orderLeftRight(poly1.centroid(), portal.p1, portal.p2);
-                    poly1.neighbors[poly2._uuid] = { polygon: poly2, portal: new Edge(p1, p2) };
-                    poly2.neighbors[poly1._uuid] = { polygon: poly1, portal: new Edge(p2, p1) };
+                    let [p1, p2] = this._orderLeftRight(
+                        poly1.centroid(),
+                        portal.p1,
+                        portal.p2
+                    );
+                    poly1.neighbors[poly2._uuid] = {
+                        polygon: poly2,
+                        portal: new Edge(p1, p2),
+                    };
+                    poly2.neighbors[poly1._uuid] = {
+                        polygon: poly1,
+                        portal: new Edge(p2, p1),
+                    };
                 }
             }
         }
@@ -413,7 +423,7 @@ export class NavMesh {
         return tail;
     }
 
-    _extendFunnel(tail, left, right, extendLeft, newPoint){
+    _extendFunnel(tail, left, right, extendLeft, newPoint) {
         const apex = tail[tail.length - 1];
         // We pretend to be in the `expandLeft` case here. Otherwise flip.
         if (!extendLeft) {
@@ -421,36 +431,41 @@ export class NavMesh {
         }
 
         // If `newPoint` is the end point of the left side of the funnel, skip it.
-        const lastLeft = left.length === 0 ? tail[tail.length - 1] : left[left.length - 1];
+        const lastLeft =
+            left.length === 0 ? tail[tail.length - 1] : left[left.length - 1];
         if (newPoint.equals(lastLeft)) {
             return;
         }
 
         // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
         let j = 0;
-        while (j < left.length
-                && this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)) {
+        while (
+            j < left.length &&
+            this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)
+        ) {
             j++;
         }
         // All points in `left` with index `< j` are right of `newPoint` and
-        // all points in `left` with index `>= j` are left of or at the same angle as `newPoint`. 
+        // all points in `left` with index `>= j` are left of or at the same angle as `newPoint`.
         left.length = j; // Shrink funnel if `j < left.length`
         left.push(newPoint);
         if (j === 0) {
             // If the funnel shrunk all the way on the left, it might collapse to the right.
             // Determine how far it needs to collapse
             let k = 0;
-            while (k < right.length
-                    && !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)) {
+            while (
+                k < right.length &&
+                !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)
+            ) {
                 k++;
             }
             // All points in `right` with index `< k` are left of or at the same angle as `newPoint` and
-            // all points in `right` with index `>= k` are right of `newPoint`. 
+            // all points in `right` with index `>= k` are right of `newPoint`.
             tail.push(...right.splice(0, k)); // Collapse funnel if `k > 0`
         }
     }
 
-    /** 
+    /**
      * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
      * Checks for right-to-left order instead if `flip = true`.
      * Returns `false` if the angles are equal.
@@ -472,5 +487,4 @@ export class NavMesh {
             return [p2, p1];
         }
     }
-
 }
