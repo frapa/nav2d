@@ -253,8 +253,8 @@ export class NavMesh {
 
                 const portal = this._computePortal(poly1, poly2);
                 if (portal !== null && portal.length() > 0) {
-                    // Ensure that portal points are given in clockwise order, viewed from the centroid of the polygon
-                    let [p1, p2] = this._orderClockwise(poly1.centroid(), portal.p1, portal.p2);
+                    // Ensure that portal points are given in left-to-right order, viewed from the centroid of the polygon
+                    let [p1, p2] = this._orderLeftRight(poly1.centroid(), portal.p1, portal.p2);
                     poly1.neighbors[poly2._uuid] = { polygon: poly2, portal: new Edge(p1, p2) };
                     poly2.neighbors[poly1._uuid] = { polygon: poly1, portal: new Edge(p2, p1) };
                 }
@@ -397,7 +397,7 @@ export class NavMesh {
             const poly = path[i];
             const nextPoly = path[i + 1];
             const portal = poly.neighbors[nextPoly._uuid].portal;
-            // The portal end points are in clockwise order, viewed from the inside of the polygon.
+            // The portal end points are in left-to-right order, viewed from the inside of the polygon.
 
             // Extend funnel on the left
             this._extendFunnel(tail, left, right, true, portal.p1);
@@ -429,7 +429,7 @@ export class NavMesh {
         // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
         let j = 0;
         while (j < left.length
-                && this._isInClockwiseOrder(apex, newPoint, left[j], !extendLeft)) {
+                && this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)) {
             j++;
         }
         // All points in `left` with index `< j` are right of `newPoint` and
@@ -441,7 +441,7 @@ export class NavMesh {
             // Determine how far it needs to collapse
             let k = 0;
             while (k < right.length
-                    && !this._isInClockwiseOrder(apex, newPoint, right[k], !extendLeft)) {
+                    && !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)) {
                 k++;
             }
             // All points in `right` with index `< k` are left of or at the same angle as `newPoint` and
@@ -451,11 +451,11 @@ export class NavMesh {
     }
 
     /** 
-     * Are the points `p1` and `p2` in clockwise order, viewed from `origin`?
-     * Checks for counter-clockwise order instead if `flip = true`.
+     * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
+     * Checks for right-to-left order instead if `flip = true`.
      * Returns `false` if the angles are equal.
      */
-    _isInClockwiseOrder(origin, p1, p2, flip = false) {
+    _isInLeftRightOrder(origin, p1, p2, flip = false) {
         if (flip) {
             [p1, p2] = [p2, p1];
         }
@@ -464,9 +464,9 @@ export class NavMesh {
         return cross(vec1, vec2) > 0;
     }
 
-    /** Returns the points `p1` and `p2` in clockwise order, viewed from `origin`. */
-    _orderClockwise(origin, p1, p2) {
-        if (this._isInClockwiseOrder(origin, p1, p2)) {
+    /** Returns the points `p1` and `p2` in left-to-right order, viewed from `origin`. */
+    _orderLeftRight(origin, p1, p2) {
+        if (this._isInLeftRightOrder(origin, p1, p2)) {
             return [p1, p2];
         } else {
             return [p2, p1];
