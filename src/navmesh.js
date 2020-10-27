@@ -438,14 +438,14 @@ export class NavMesh {
             return;
         }
 
-        // Determine angle of `apex`-`newPoint` relative to `apex`-`left[j]`
-        let j = 0;
-        while (
-            j < left.length &&
-            this._isInLeftRightOrder(apex, newPoint, left[j], !extendLeft)
-        ) {
-            j++;
-        }
+        // Determine how far to shrink the funnel
+        let j = this._findFirstLeftOfPoint(
+            apex,
+            left,
+            newPoint,
+            true,
+            !extendLeft
+        );
         // All points in `left` with index `< j` are right of `newPoint` and
         // all points in `left` with index `>= j` are left of or at the same angle as `newPoint`.
         left.length = j; // Shrink funnel if `j < left.length`
@@ -453,13 +453,13 @@ export class NavMesh {
         if (j === 0) {
             // If the funnel shrunk all the way on the left, it might collapse to the right.
             // Determine how far it needs to collapse
-            let k = 0;
-            while (
-                k < right.length &&
-                !this._isInLeftRightOrder(apex, newPoint, right[k], !extendLeft)
-            ) {
-                k++;
-            }
+            let k = this._findFirstLeftOfPoint(
+                apex,
+                right,
+                newPoint,
+                false,
+                extendLeft
+            );
             // All points in `right` with index `< k` are left of or at the same angle as `newPoint` and
             // all points in `right` with index `>= k` are right of `newPoint`.
             tail.push(...right.splice(0, k)); // Collapse funnel if `k > 0`
@@ -467,17 +467,34 @@ export class NavMesh {
     }
 
     /**
-     * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
-     * Checks for right-to-left order instead if `flip = true`.
-     * Returns `false` if the angles are equal.
+     * Given an array `arr` of points, find the index of the first one that is
+     * on the left side of a given point `p`, viewed from `origin`. If no such
+     * point exists, the length of the list is returned.
+     *
+     * If `flip` is true, find the first that is on the right side instead.
+     *
+     * If `acceptColinear` is true, the returned point may also be colinear.
      */
-    _isInLeftRightOrder(origin, p1, p2, flip = false) {
-        if (flip) {
-            [p1, p2] = [p2, p1];
+    _findFirstLeftOfPoint(origin, arr, p, acceptColinear, flip) {
+        let i;
+        for (i = 0; i < arr.length; i++) {
+            const found = flip
+                ? this._isInLeftRightOrder(origin, p, arr[i], acceptColinear)
+                : this._isInLeftRightOrder(origin, arr[i], p, acceptColinear);
+            if (found) return i;
         }
+        return i;
+    }
+
+    /**
+     * Are the points `p1` and `p2` in left-to-right order, viewed from `origin`?
+     * If points are colinear, the value of `acceptColinear` is returned.
+     */
+    _isInLeftRightOrder(origin, p1, p2, acceptColinear = false) {
         const vec1 = p1.sub(origin);
         const vec2 = p2.sub(origin);
-        return cross(vec1, vec2) < 0;
+        const c = cross(vec1, vec2);
+        return acceptColinear ? c <= 0 : c < 0;
     }
 
     /** Returns the points `p1` and `p2` in left-to-right order, viewed from `origin`. */
