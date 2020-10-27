@@ -408,22 +408,23 @@ export class NavMesh {
             const nextPoly = path[i + 1];
             const portal = poly.neighbors[nextPoly._uuid].portal;
             // The portal end points are in left-to-right order, viewed from the inside of the polygon.
-
-            // Extend funnel on the left
-            this._extendFunnel(tail, left, right, true, portal.p1);
-
-            // Extend funnel on the right
-            this._extendFunnel(tail, left, right, false, portal.p2);
+            this._extendFunnel(tail, left, right, portal.p1, portal.p2);
         }
 
         // Close funnel to endpoint
-        this._extendFunnel(tail, left, right, true, to);
-        this._extendFunnel(tail, left, right, false, to);
+        this._extendFunnel(tail, left, right, to, to);
 
         return tail;
     }
 
-    _extendFunnel(tail, left, right, extendLeft, newPoint) {
+    _extendFunnel(tail, left, right, leftPoint, rightPoint) {
+        // Extend funnel on the left
+        this._extendFunnelSide(tail, left, right, true, leftPoint);
+        // Extend funnel on the right
+        this._extendFunnelSide(tail, left, right, false, rightPoint);
+    }
+
+    _extendFunnelSide(tail, left, right, extendLeft, newPoint) {
         const apex = tail[tail.length - 1];
         // We pretend to be in the `expandLeft` case here. Otherwise flip.
         if (!extendLeft) {
