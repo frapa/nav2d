@@ -7,7 +7,7 @@
 
 ## 1.3.0
 
--   The funnel finding algorithm has been rewritten (thanks @abentkamp). The new
+-   The funnel finding algorithm has been rewritten (thanks [@abentkamp](https://github.com/abentkamp)). The new
     implementation should be stabler and is much faster, leading to 25-30% faster
     pathfinding in general. The code maintainability has also improved.
 
