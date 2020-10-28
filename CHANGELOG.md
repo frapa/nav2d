@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+-   The funnel finding algorithm has been rewritten (thanks @abendkamp). The new
+    implementation should be stabler and is much faster, leading to 25-30% faster
+    pathfinding in general. The code maintainability has also improved.
+
 ## 1.2.1
 
 -   Fixed bug that would break path finding in certain cases when the path points where close
