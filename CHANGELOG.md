@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+-   Reduce package size by keeping out unnecessary files from the package.
+-   Bumped dependency version (due to vulnerability).
+
 ## 1.3.0
 
 -   The funnel finding algorithm has been rewritten (thanks @abendkamp). The new
