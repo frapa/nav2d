@@ -49,7 +49,7 @@ declare module "nav2d" {
     }
 
     export class NavMesh {
-        constructor(polygons: Polygon[] | Point[][], costFunc?: (polygon1: any, polygon2: any, portal: any) => {}, heuristicFunc?: (poly: any, to: any) => {});
+        constructor(polygons: Point[][], costFunc?: (polygon1: any, polygon2: any, portal: any) => {}, heuristicFunc?: (poly: any, to: any) => {});
 
         polygons: Polygon[];
         pointQuerySize: number;
