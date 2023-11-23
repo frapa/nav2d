@@ -2,10 +2,10 @@ declare module "nav2d" {
     export class Vector {
         constructor(x: number, y: number);
 
-        add(other: Vector): Vector;
-        sub(other: Vector): Vector;
-        mul(other: Vector): Vector;
-        div(other: Vector): Vector;
+        add(other: Vector | number): Vector;
+        sub(other: Vector | number): Vector;
+        mul(other: Vector | number): Vector;
+        div(other: Vector | number): Vector;
         length(): number;
         equals(other: Vector): boolean;
         angle(other: Vector): number;
@@ -34,7 +34,7 @@ declare module "nav2d" {
     }
 
     export class Polygon {
-        constructor(points: Point[])
+        constructor(points: Point[]);
 
         points: Vector[];
         bounds: [number, number, number, number];
@@ -49,13 +49,15 @@ declare module "nav2d" {
     }
 
     export class NavMesh {
-        constructor(polygons: Point[][], costFunc?: (polygon1: any, polygon2: any, portal: any) => {}, heuristicFunc?: (poly: any, to: any) => {});
+        constructor(polygons: Point[][], costFunc?: CostFunction, heuristicFunc?: HeuristicFunction);
 
         polygons: Polygon[];
         pointQuerySize: number;
 
-        findPath(from: Point, to: Point): Point[] | null
+        findPath(from: Point, to: Point): Point[] | null;
     }
 
-    export type Point = Vector | [number, number] | { x: number, y: number }
+    export type Point = Vector | [number, number] | { x: number, y: number };
+    export type CostFunction = (polygon1: Polygon, polygon2: Polygon, portal: Edge) => number;
+    export type HeuristicFunction = (poly: Polygon, to: Polygon) => number;
 }
