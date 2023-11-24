@@ -426,8 +426,9 @@ test("navmesh_find_path_angle_acos_outside_range", (t) => {
     ]);
 });
 
+import bug2_mesh from "./tower_defense.json" assert { type: 'json' };
 test("navmesh_find_path_bug2", (t) => {
-    const navmesh = new NavMesh(require("./tower_defense.json"));
+    const navmesh = new NavMesh(bug2_mesh);
 
     const path = navmesh.findPath([30, 1000], [970, 0]);
 
@@ -447,16 +448,18 @@ test("navmesh_find_path_bug2", (t) => {
     ]);
 });
 
+import bug3_mesh from "./point_quadtree_query.json" assert { type: 'json' };
 test("navmesh_find_path_bug3", (t) => {
-    const navmesh = new NavMesh(require("./point_quadtree_query.json"));
+    const navmesh = new NavMesh(bug3_mesh);
 
     const path = navmesh.findPath([898, 1861], [898, 1862]);
 
     t.deepEqual(path, [new Vector(898, 1861), new Vector(898, 1862)]);
 });
 
+import bug4_mesh from "./boat.json" assert { type: 'json' };
 test("navmesh_find_path_bug4", (t) => {
-    const navmesh = new NavMesh(require("./boat.json"));
+    const navmesh = new NavMesh(bug4_mesh);
 
     const path = navmesh.findPath([466, 167], [289, 175]);
 

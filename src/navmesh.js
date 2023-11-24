@@ -4,7 +4,7 @@ import earcut from "earcut";
 import QuadTree from "simple-quadtree";
 import TinyQueue from "tinyqueue";
 
-import { Vector, isclose, cross, dot } from "./math";
+import { Vector, isclose, cross, dot } from "./math.js";
 
 function _normalizePoint(point) {
     if (point instanceof Array) {
