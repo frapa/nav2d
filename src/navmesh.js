@@ -183,19 +183,47 @@ export class Polygon {
 }
 
 export class NavMesh {
-    constructor(polygons, costFunc = null, heuristicFunc = null) {
+    constructor(polygons, options = {}, heuristicFunc = null) {
         this._uuid = uuidv4();
-        this.polygons = this._triangulate(polygons).map(
-            (points) => new Polygon(points)
-        );
-        this.costFunc = costFunc;
-        this.heuristicFunc = heuristicFunc;
+
+        options = {
+            triangulate: true,
+            pointQuerySize: 0.01,
+            ...options, // Yes, this works even if options is null or a function!
+        };
+        // The following ifs provide backward compatibility
+        if (typeof options === 'function') {
+            console.warn(
+                "DEPRECATION WARNING: nav2d now uses the signature "
+                + "NavMesh(polygons, options = { costFunc: ..., heuristicFunc: ... }) "
+                + "but you are using the old signature NavMesh(polygons, costFunc, heuristicFunc). "
+                + "Please update, the code will break in a future release."
+            );
+            options.costFunc = options;
+        }
+        if (typeof heuristicFunc === 'function') {
+            console.warn(
+                "DEPRECATION WARNING: nav2d now uses the signature "
+                + "NavMesh(polygons, options = { costFunc: ..., heuristicFunc: ... }) "
+                + "but you are using the old signature NavMesh(polygons, costFunc, heuristicFunc). "
+                + "Please update, the code will break in a future release."
+            );
+            options.heuristicFunc = heuristicFunc;
+        }
+        
+        this.costFunc = options.costFunc || ((a, b) => this._computeDistance(a, b));
+        this.heuristicFunc = options.heuristicFunc || ((a, b) => this._computeDistance(a, b));
+
+        if (options.triangulate) {
+            polygons = this._triangulate(polygons);
+        }
+        this.polygons = polygons.map((points) => new Polygon(points));
 
         // This will be used to check point collision with
         // triangles. This should be much smaller that the typical
         // size of your mesh triangles to avoid checking too many
         // triangles for collision.
-        this.pointQuerySize = 0.01;
+        this.pointQuerySize = options.pointQuerySize;
 
         this._buildQuadtree();
         this._buildNeighbors();
@@ -340,17 +368,13 @@ export class NavMesh {
     }
 
     _computeCost(a, b) {
-        if (this.costFunc !== null) {
-            const portal = a.neighbors[b._uuid].portal;
-            return this.costFunc(a, b, portal);
-        }
-        return this._computeDistance(a, b);
+        const portal = a.neighbors[b._uuid].portal;
+        return this.costFunc(a, b, portal);
     }
 
     _heuristic(poly, to) {
         if (poly._uuid == to._uuid) return 0;
-        if (this.heuristicFunc !== null) return this.heuristicFunc(poly, to);
-        return this._computeDistance(poly, to);
+        return this.heuristicFunc(poly, to);
     }
 
     _findContainingPolygon(point) {

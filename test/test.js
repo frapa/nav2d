@@ -51,8 +51,10 @@ function navmesh(costFunc = null, heuristicFunc = null) {
                 [100, 110],
             ],
         ],
-        costFunc,
-        heuristicFunc
+        {
+            costFunc,
+            heuristicFunc,
+        }
     );
 }
 

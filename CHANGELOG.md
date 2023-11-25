@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.0
+
+- Changed interface from `NavMesh(polygons, costFunc, heuristicFunc)` 
+  to `NavMesh(polygons, options?)`. The previous signature is accepted 
+  for backward compatibility until version 2.0.0, but please update.
+- Added new `triangulate = true|false` option, which allows disabling
+  automatic triangulation.
+- Added new `pointQuerySize` (previously was only an attribute),
+  to allow customizing the behavior more easily.
+- Added TypeScript annotation file to enable typing.
+- Updated all dependencies and solved all vulnerabilities.
+- Fixed some routing bugs.
+
 ## 1.3.1
 
 -   Reduce package size by keeping out unnecessary files from the package.

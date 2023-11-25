@@ -49,7 +49,7 @@ declare module "nav2d" {
     }
 
     export class NavMesh {
-        constructor(polygons: Point[][], costFunc?: CostFunction, heuristicFunc?: HeuristicFunction);
+        constructor(polygons: Point[][], options?: NavMeshOptions);
 
         polygons: Polygon[];
         pointQuerySize: number;
@@ -58,6 +58,10 @@ declare module "nav2d" {
     }
 
     export type Point = Vector | [number, number] | { x: number, y: number };
-    export type CostFunction = (polygon1: Polygon, polygon2: Polygon, portal: Edge) => number;
-    export type HeuristicFunction = (poly: Polygon, to: Polygon) => number;
+    export interface NavMeshOptions {
+        triangulate?: boolean;
+        pointQuerySize?: number;
+        costFunc?: (polygon1: Polygon, polygon2: Polygon, portal: Edge) => number;
+        heuristicFunc?: (poly: Polygon, to: Polygon) => number;
+    }
 }

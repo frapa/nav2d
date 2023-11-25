@@ -103,7 +103,16 @@ as `Point(x, y)` objects.
 > a neighbors cache to speed up neighbor lookup when searching. This is a one-time
 > cost (e.g. the `NavMesh` class is optimized to be instantiated once and use multiple
 > times). Ballpark performance numbers are 1.5 seconds for 1000 polygons and 15 seconds for
-> 10 000 polygons (linearly dependent on polygon count).
+> 10_000 polygons (linearly dependent on polygon count).
+>
+> If your mesh is made up of only triangles, for instance because you use an external triangulation
+> algorithm, you can use `new NavMesh(polygons, { triangulate: false })` to skip it, but there
+> will still be some cost in caching neighboring triangles. If you disable triangulation on a 
+> mesh which isn't made of triangles, the library will return wrong results.
+> 
+> For games where the mesh is always the same (for instance the map does not change), 
+> the best option is to triangulate the navigation mesh when you create the map, load the map
+> already triangulated and disable triangulation. This will be the fastest. 
 
 Now we can query paths:
 
@@ -116,14 +125,25 @@ As you can see from the output, thanks to the funnel algorithm, the path will on
 contain the necessary path points (in this case a straight line). If no path can be
 found (disconnected islands or endpoints outside the mesh) `null` will be returned.
 
+> **Warning:** The path quality heavily depends on the quality of the triangulation.
+> If your mesh has a lot of skinny triangles, it might not choose the path you would expect.
+>
+> `nav2d` automatically triangulates the mesh with [earcut](https://www.npmjs.com/package/earcut), 
+> which is fast but sometimes generates non-optimal triangulations. If you have this problem,
+> you can try triangulating your mesh manually with a library such as [poly2tri](https://github.com/r3mi/poly2tri.js),
+> as [some user successfully did](https://github.com/frapa/nav2d/issues/29).
+>
+> If you manually triangulate, make sure to disable triangulation using the 
+> `new NavMesh(polygons, { triangulate: false })` option to avoid unnecessary work.
+
 To find the path, a optimized A\* implementation is used. You can override the default
-the cost and heuristic functions (or only one of the two by passing `null`), by passing them to the
-`NavMesh` constructor. For example, to implement a simpler breadth first search, we can do:
+the cost and heuristic functions, by passing an `options` object to the `NavMesh` constructor.
+For example, to implement a simpler breadth first search, we can do:
 
 ```javascript
 const costFunc = (polygon1, polygon2, portal) => 1;
 const heuristicFunc = () => (polygon, to) => 0;
-const navmesh = new NavMesh([...], costFunc, heuristicFunc);
+const navmesh = new NavMesh([...], { costFunc, heuristicFunc });
 // Use as before
 ```
 
@@ -133,8 +153,7 @@ Instead, to implement Dijkstra’s Algorithm, you can:
 const heuristicFunc = () => (polygon, to) => 0;
 const navmesh = new NavMesh(
     [...],
-    null, // if null, the default will be used */
-    heuristicFunc
+    { heuristicFunc }
 );
 ```
 
@@ -254,7 +273,23 @@ Properties:
 
 Methods:
 
--   `NavMesh(polygons, costFunc = null, heuristicFunc = null)` - Construct navigation mesh.
+-   `NavMesh(polygons, options?)` - Construct navigation mesh. Arguments:
+    - `polygons` - A list of polygons, each polygon being a list of points.
+    - `options` - Optional settings. This is the default:
+        ```javascript
+        {
+            // Boolean indicating whether to triangulate mesh or not.
+            triangulate: true,
+            // Threshold used to check triangle collision.
+            // This should be much smaller that the typical
+            // size of your mesh triangles too many checks.
+            pointQuerySize: 0.01,
+            // A cost function (see docs above).
+            costFunc: euclideanDistance,
+            // An heuristic function (see docs above)
+            heuristicFunc: euclideanDistance,
+        }
+        ```
 -   `findPath(from, to)` - Find path from `from` point to `to` point. Returns a list of points, or null if not found.
 
 ## Changelog
