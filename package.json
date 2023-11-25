@@ -24,7 +24,7 @@
         "AI"
     ],
     "scripts": {
-        "build": "webpack && webpack --config webpack_deps.config.js",
+        "build": "webpack && webpack --config webpack_deps.config.cjs",
         "prepublish": "npm test && npm run build",
         "test": "npm run lint && nyc ava --verbose",
         "lint": "eslint src",

@@ -426,9 +426,9 @@ test("navmesh_find_path_angle_acos_outside_range", (t) => {
     ]);
 });
 
-import bug2_mesh from "./tower_defense.json" assert { type: 'json' };
-test("navmesh_find_path_bug2", (t) => {
-    const navmesh = new NavMesh(bug2_mesh);
+import tower_defense_mesh from "./tower_defense.json" assert { type: 'json' };
+test("navmesh_find_path_tower_defense", (t) => {
+    const navmesh = new NavMesh(tower_defense_mesh);
 
     const path = navmesh.findPath([30, 1000], [970, 0]);
 
@@ -448,22 +448,56 @@ test("navmesh_find_path_bug2", (t) => {
     ]);
 });
 
-import bug3_mesh from "./point_quadtree_query.json" assert { type: 'json' };
-test("navmesh_find_path_bug3", (t) => {
-    const navmesh = new NavMesh(bug3_mesh);
+import point_quadtree_mesh from "./point_quadtree_query.json" assert { type: 'json' };
+test("navmesh_find_path_point_quadtree", (t) => {
+    const navmesh = new NavMesh(point_quadtree_mesh);
 
     const path = navmesh.findPath([898, 1861], [898, 1862]);
 
     t.deepEqual(path, [new Vector(898, 1861), new Vector(898, 1862)]);
 });
 
-import bug4_mesh from "./boat.json" assert { type: 'json' };
-test("navmesh_find_path_bug4", (t) => {
-    const navmesh = new NavMesh(bug4_mesh);
+import boat_mesh from "./boat.json" assert { type: 'json' };
+test("navmesh_find_path_boat", (t) => {
+    const navmesh = new NavMesh(boat_mesh);
 
     const path = navmesh.findPath([466, 167], [289, 175]);
 
     t.deepEqual(path, [new Vector(466, 167), new Vector(443, 181), new Vector(323, 188), new Vector(289, 175)]);
+})
+
+import kukumber_mesh from "./kukumber.json" assert { type: 'json' };
+test("navmesh_find_path_kukumber", (t) => {
+    const navmesh = new NavMesh(kukumber_mesh);
+    
+    const path = navmesh.findPath([555, 95], [-15, 611]);
+
+    t.deepEqual(path, [
+        new Vector(555, 95),
+        new Vector(954, 109),
+        new Vector(944, 172),
+        new Vector(974, 230),
+        new Vector(990, 453),
+        new Vector(625, 684),
+        new Vector(249, 437),
+        new Vector(-15, 611),
+    ]);
+})
+
+import two_holes_mesh from "./two_holes.json" assert { type: 'json' };
+test("navmesh_find_path_two_holes", (t) => {
+    const navmesh = new NavMesh(two_holes_mesh);
+
+    const path = navmesh.findPath([696, -16], [395, 84]);
+ 
+    t.deepEqual(path, [
+        new Vector(696, -16),
+        new Vector(667, -20),
+        new Vector(584, -11),
+        new Vector(496, 88),
+        new Vector(418, 87),
+        new Vector(395, 84),
+    ]);
 })
 
 test("navmesh_performance", (t) => {
